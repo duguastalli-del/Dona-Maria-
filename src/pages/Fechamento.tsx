@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Lock, Unlock } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import SeletorData from "../components/SeletorData";
-import { calcularFechamento } from "../lib/calculos";
+import { calcularFechamento, calcularTotalMes } from "../lib/calculos";
 import { formatarMoeda } from "../lib/format";
 import { CANAIS, FORMAS_PAGAMENTO, ROTULO_CANAL, ROTULO_FORMA_PAGAMENTO } from "../lib/rotulos";
 
@@ -30,6 +30,7 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
   const { lancamentos, diaStatus, fecharDiaPor, reabrirDiaPor } = useDados();
   const status = diaStatus(data);
   const fechamento = useMemo(() => calcularFechamento(data, lancamentos), [data, lancamentos]);
+  const totalMes = useMemo(() => calcularTotalMes(data, lancamentos), [data, lancamentos]);
 
   const [dinheiroContado, setDinheiroContado] = useState<string>(
     status.dinheiro_contado != null ? String(status.dinheiro_contado) : "",
@@ -59,9 +60,15 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
     <div className="flex flex-col gap-4 pb-4">
       <SeletorData data={data} onMudar={onMudarData} />
 
-      <div className="bg-marca rounded-2xl px-4 py-4 text-white flex items-center justify-between">
-        <span className="text-sm font-semibold opacity-90">Total geral vendido</span>
-        <span className="text-2xl font-bold">{formatarMoeda(fechamento.total_geral)}</span>
+      <div className="bg-marca rounded-2xl px-4 py-4 text-white flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold opacity-90">Total geral vendido</span>
+          <span className="text-2xl font-bold">{formatarMoeda(fechamento.total_geral)}</span>
+        </div>
+        <div className="flex items-center justify-between border-t border-white/20 pt-2">
+          <span className="text-xs font-semibold opacity-90">Total do mês</span>
+          <span className="text-base font-bold">{formatarMoeda(totalMes)}</span>
+        </div>
       </div>
 
       <Cartao titulo="Total por canal">

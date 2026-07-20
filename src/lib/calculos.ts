@@ -75,3 +75,48 @@ export function calcularFiadoAbertoTotal(todosLancamentos: Lancamento[]): number
     .filter((l) => l.canal === "fiado" && !l.fiado_quitado)
     .reduce((soma, l) => soma + valorLancamento(l), 0);
 }
+
+export function calcularTotalMes(data: string, todosLancamentos: Lancamento[]): number {
+  const prefixoMes = data.slice(0, 7); // YYYY-MM
+  return todosLancamentos
+    .filter((l) => l.data.startsWith(prefixoMes))
+    .reduce((soma, l) => soma + valorLancamento(l), 0);
+}
+
+export interface TotalEmpresaPeriodo {
+  empresa_nome: string;
+  total: number;
+  lancamentos: Lancamento[];
+  por_forma_pagamento: TotaisPorFormaPagamento;
+}
+
+export function calcularTotaisPorEmpresa(
+  todosLancamentos: Lancamento[],
+  dataInicio: string,
+  dataFim: string,
+): TotalEmpresaPeriodo[] {
+  const doPeriodo = todosLancamentos.filter(
+    (l) => l.canal === "empresa" && l.empresa_nome && l.data >= dataInicio && l.data <= dataFim,
+  );
+
+  const porEmpresa = new Map<string, Lancamento[]>();
+  for (const l of doPeriodo) {
+    const nome = l.empresa_nome as string;
+    const lista = porEmpresa.get(nome) ?? [];
+    lista.push(l);
+    porEmpresa.set(nome, lista);
+  }
+
+  return Array.from(porEmpresa.entries())
+    .map(([empresa_nome, lancamentos]) => {
+      const por_forma_pagamento = totaisFormaPagamentoVazio();
+      let total = 0;
+      for (const l of lancamentos) {
+        const valor = valorLancamento(l);
+        total += valor;
+        if (l.forma_pagamento) somarPorForma(por_forma_pagamento, l.forma_pagamento, valor);
+      }
+      return { empresa_nome, total, lancamentos, por_forma_pagamento };
+    })
+    .sort((a, b) => b.total - a.total);
+}

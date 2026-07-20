@@ -8,12 +8,20 @@ interface Props {
   item: Item;
   data: string;
   lancamentoExistente?: Lancamento;
+  quantidadeInicial?: number;
   onFechar: () => void;
   onSalvar: (entrada: Omit<Lancamento, "id" | "criado_em">) => void;
 }
 
-export default function ModalLancamento({ item, data, lancamentoExistente, onFechar, onSalvar }: Props) {
-  const [quantidade, setQuantidade] = useState(lancamentoExistente?.quantidade ?? 1);
+export default function ModalLancamento({
+  item,
+  data,
+  lancamentoExistente,
+  quantidadeInicial,
+  onFechar,
+  onSalvar,
+}: Props) {
+  const [quantidade, setQuantidade] = useState(lancamentoExistente?.quantidade ?? quantidadeInicial ?? 1);
   const [valorUnitario, setValorUnitario] = useState(
     lancamentoExistente?.valor_unitario ?? item.valor_unitario_padrao,
   );
@@ -22,9 +30,11 @@ export default function ModalLancamento({ item, data, lancamentoExistente, onFec
     lancamentoExistente?.forma_pagamento ?? "dinheiro",
   );
   const [fiadoCliente, setFiadoCliente] = useState(lancamentoExistente?.fiado_cliente ?? "");
+  const [empresaNome, setEmpresaNome] = useState(lancamentoExistente?.empresa_nome ?? "");
   const [erro, setErro] = useState("");
 
   const isFiado = canal === "fiado";
+  const isEmpresa = canal === "empresa";
   const total = quantidade * valorUnitario;
 
   function salvar() {
@@ -40,6 +50,10 @@ export default function ModalLancamento({ item, data, lancamentoExistente, onFec
       setErro("Informe o nome do cliente fiado.");
       return;
     }
+    if (isEmpresa && !empresaNome.trim()) {
+      setErro("Informe o nome da empresa.");
+      return;
+    }
 
     onSalvar({
       data,
@@ -52,6 +66,7 @@ export default function ModalLancamento({ item, data, lancamentoExistente, onFec
       fiado_quitado: lancamentoExistente?.fiado_quitado ?? false,
       fiado_quitado_em: lancamentoExistente?.fiado_quitado_em ?? null,
       fiado_forma_pagamento: lancamentoExistente?.fiado_forma_pagamento ?? null,
+      empresa_nome: isEmpresa ? empresaNome.trim() : null,
     });
   }
 
@@ -110,6 +125,19 @@ export default function ModalLancamento({ item, data, lancamentoExistente, onFec
             ))}
           </div>
         </div>
+
+        {isEmpresa && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-tinta block">Nome da empresa</label>
+            <input
+              type="text"
+              value={empresaNome}
+              onChange={(e) => setEmpresaNome(e.target.value)}
+              placeholder="Ex: Transportes ABC"
+              className="w-full rounded-xl px-3 py-3 text-base outline-none bg-fundo border border-linha"
+            />
+          </div>
+        )}
 
         {isFiado ? (
           <div className="space-y-1.5">

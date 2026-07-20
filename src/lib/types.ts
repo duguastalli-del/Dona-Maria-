@@ -23,6 +23,7 @@ export interface Lancamento {
   fiado_quitado: boolean;
   fiado_quitado_em: string | null; // YYYY-MM-DD
   fiado_forma_pagamento: FormaPagamento | null;
+  empresa_nome: string | null; // nome da empresa quando canal = empresa
   criado_em: string; // ISO timestamp
 }
 

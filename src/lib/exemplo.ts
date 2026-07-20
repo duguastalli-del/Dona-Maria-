@@ -25,6 +25,7 @@ function novoLancamento(parcial: {
   fiado_quitado?: boolean;
   fiado_quitado_em?: string;
   fiado_forma_pagamento?: Lancamento["forma_pagamento"];
+  empresa_nome?: string;
   valor_unitario?: number;
 }): Lancamento {
   const item = porId(parcial.item_id);
@@ -40,6 +41,7 @@ function novoLancamento(parcial: {
     fiado_quitado: parcial.fiado_quitado ?? false,
     fiado_quitado_em: parcial.fiado_quitado_em ?? null,
     fiado_forma_pagamento: parcial.fiado_forma_pagamento ?? null,
+    empresa_nome: parcial.empresa_nome ?? null,
     criado_em: new Date().toISOString(),
   };
 }
@@ -48,6 +50,7 @@ export function criarLancamentosExemplo(): Lancamento[] {
   const hoje = dataOffset(0);
   const ontem = dataOffset(1);
   const anteontem = dataOffset(2);
+  const mesPassado = dataOffset(35);
 
   return [
     // Hoje — vendas variadas pra demonstrar o fechamento
@@ -58,7 +61,22 @@ export function criarLancamentosExemplo(): Lancamento[] {
     novoLancamento({ data: hoje, item_id: "refrigerante-1-5-2lt", quantidade: 4, canal: "salao", forma_pagamento: "dinheiro" }),
     novoLancamento({ data: hoje, item_id: "cerveja-garrafa", quantidade: 6, canal: "salao", forma_pagamento: "cartao" }),
     novoLancamento({ data: hoje, item_id: "sorvete", quantidade: 3, canal: "salao", forma_pagamento: "dinheiro" }),
-    novoLancamento({ data: hoje, item_id: "marmitex-g", quantidade: 4, canal: "empresa", forma_pagamento: "pix" }),
+    novoLancamento({
+      data: hoje,
+      item_id: "marmitex-g",
+      quantidade: 4,
+      canal: "empresa",
+      forma_pagamento: "pix",
+      empresa_nome: "Transportadora Silva",
+    }),
+    novoLancamento({
+      data: hoje,
+      item_id: "marmitex-m",
+      quantidade: 3,
+      canal: "empresa",
+      forma_pagamento: "dinheiro",
+      empresa_nome: "Padaria Bom Pão",
+    }),
     // Fiado aberto hoje
     novoLancamento({ data: hoje, item_id: "marmitex-p", quantidade: 1, canal: "fiado", fiado_cliente: "Seu Antônio" }),
 
@@ -82,6 +100,16 @@ export function criarLancamentosExemplo(): Lancamento[] {
     novoLancamento({ data: anteontem, item_id: "meio-almoco", quantidade: 4, canal: "salao", forma_pagamento: "pix" }),
     novoLancamento({ data: anteontem, item_id: "cerveja-garrafa", quantidade: 8, canal: "salao", forma_pagamento: "dinheiro" }),
     novoLancamento({ data: anteontem, item_id: "brigadeiro", quantidade: 12, canal: "salao", forma_pagamento: "dinheiro" }),
+
+    // Empresa do mês passado, pra demonstrar o fechamento por período em Empresas
+    novoLancamento({
+      data: mesPassado,
+      item_id: "marmitex-g",
+      quantidade: 6,
+      canal: "empresa",
+      forma_pagamento: "dinheiro",
+      empresa_nome: "Transportadora Silva",
+    }),
   ];
 }
 
