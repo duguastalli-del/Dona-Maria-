@@ -5,7 +5,6 @@ import BottomNav, { type Aba } from "./components/BottomNav";
 import Sidebar from "./components/Sidebar";
 import Lancamentos from "./pages/Lancamentos";
 import Fechamento from "./pages/Fechamento";
-import Vendas from "./pages/Vendas";
 import Empresas from "./pages/Empresas";
 import Fiados from "./pages/Fiados";
 import Historico from "./pages/Historico";
@@ -14,8 +13,7 @@ import { hojeISO } from "./lib/format";
 
 const TITULOS: Record<Aba, string> = {
   lancamentos: "Lançamento do dia",
-  fechamento: "Fechamento do dia",
-  vendas: "Vendas por período",
+  fechamento: "Fechamento",
   empresas: "Empresas",
   fiados: "Fiados",
   historico: "Histórico",
@@ -76,7 +74,6 @@ export default function App() {
               <>
                 {aba === "lancamentos" && <Lancamentos data={data} onMudarData={setData} />}
                 {aba === "fechamento" && <Fechamento data={data} onMudarData={setData} />}
-                {aba === "vendas" && <Vendas />}
                 {aba === "empresas" && <Empresas />}
                 {aba === "fiados" && <Fiados />}
                 {aba === "historico" && <Historico />}
