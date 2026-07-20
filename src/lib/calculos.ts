@@ -83,6 +83,76 @@ export function calcularTotalMes(data: string, todosLancamentos: Lancamento[]): 
     .reduce((soma, l) => soma + valorLancamento(l), 0);
 }
 
+export interface TotaisPeriodo {
+  data_inicio: string;
+  data_fim: string;
+  total_geral: number;
+  total_por_canal: TotaisPorCanal;
+  vendas_periodo_por_forma_pagamento: TotaisPorFormaPagamento;
+  fiados_quitados_periodo_por_forma_pagamento: TotaisPorFormaPagamento;
+  total_por_forma_pagamento: TotaisPorFormaPagamento;
+  fiado_gerado_periodo: number;
+  fiado_aberto_periodo: number;
+  fiado_quitado_periodo: number;
+}
+
+export function calcularTotaisPeriodo(
+  dataInicio: string,
+  dataFim: string,
+  todosLancamentos: Lancamento[],
+): TotaisPeriodo {
+  const doPeriodo = todosLancamentos.filter((l) => l.data >= dataInicio && l.data <= dataFim);
+  const quitadosNoPeriodo = todosLancamentos.filter(
+    (l) => l.fiado_quitado_em !== null && l.fiado_quitado_em >= dataInicio && l.fiado_quitado_em <= dataFim,
+  );
+
+  const total_por_canal = totaisCanalVazio();
+  const vendas_periodo_por_forma_pagamento = totaisFormaPagamentoVazio();
+  let total_geral = 0;
+  let fiado_gerado_periodo = 0;
+  let fiado_aberto_periodo = 0;
+
+  for (const l of doPeriodo) {
+    const valor = valorLancamento(l);
+    total_geral += valor;
+    somarPorCanal(total_por_canal, l.canal, valor);
+    if (l.forma_pagamento) somarPorForma(vendas_periodo_por_forma_pagamento, l.forma_pagamento, valor);
+    if (l.canal === "fiado") {
+      fiado_gerado_periodo += valor;
+      if (!l.fiado_quitado) fiado_aberto_periodo += valor;
+    }
+  }
+
+  const fiados_quitados_periodo_por_forma_pagamento = totaisFormaPagamentoVazio();
+  let fiado_quitado_periodo = 0;
+  for (const l of quitadosNoPeriodo) {
+    const valor = valorLancamento(l);
+    fiado_quitado_periodo += valor;
+    if (l.fiado_forma_pagamento) {
+      somarPorForma(fiados_quitados_periodo_por_forma_pagamento, l.fiado_forma_pagamento, valor);
+    }
+  }
+
+  const total_por_forma_pagamento: TotaisPorFormaPagamento = {
+    dinheiro: vendas_periodo_por_forma_pagamento.dinheiro + fiados_quitados_periodo_por_forma_pagamento.dinheiro,
+    pix: vendas_periodo_por_forma_pagamento.pix + fiados_quitados_periodo_por_forma_pagamento.pix,
+    cartao: vendas_periodo_por_forma_pagamento.cartao + fiados_quitados_periodo_por_forma_pagamento.cartao,
+  };
+
+  return {
+    data_inicio: dataInicio,
+    data_fim: dataFim,
+    total_geral,
+    total_por_canal,
+    vendas_periodo_por_forma_pagamento,
+    fiados_quitados_periodo_por_forma_pagamento,
+    total_por_forma_pagamento,
+    fiado_gerado_periodo,
+    fiado_aberto_periodo,
+    fiado_quitado_periodo,
+  };
+}
+
 export interface TotalEmpresaPeriodo {
   empresa_nome: string;
   total: number;

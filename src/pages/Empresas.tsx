@@ -1,18 +1,15 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
+import SeletorPeriodo from "../components/SeletorPeriodo";
 import { calcularTotaisPorEmpresa } from "../lib/calculos";
-import { formatarDataCurta, formatarMoeda, hojeISO } from "../lib/format";
+import { formatarDataCurta, formatarMoeda, hojeISO, primeiroDiaDoMesISO } from "../lib/format";
 import { FORMAS_PAGAMENTO, ROTULO_FORMA_PAGAMENTO } from "../lib/rotulos";
-
-function primeiroDiaDoMes(data: string): string {
-  return `${data.slice(0, 7)}-01`;
-}
 
 export default function Empresas() {
   const { lancamentos, itens } = useDados();
   const hoje = hojeISO();
-  const [dataInicio, setDataInicio] = useState(primeiroDiaDoMes(hoje));
+  const [dataInicio, setDataInicio] = useState(primeiroDiaDoMesISO(hoje));
   const [dataFim, setDataFim] = useState(hoje);
   const [expandida, setExpandida] = useState<string | null>(null);
 
@@ -25,29 +22,14 @@ export default function Empresas() {
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      <div className="bg-white rounded-2xl border border-linha px-4 py-3 flex flex-col gap-3">
-        <h3 className="text-xs font-bold text-apoio uppercase tracking-wide">Período</h3>
-        <div className="flex gap-3">
-          <div className="flex-1 space-y-1.5">
-            <label className="text-xs font-semibold text-tinta block">Início</label>
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none bg-fundo border border-linha"
-            />
-          </div>
-          <div className="flex-1 space-y-1.5">
-            <label className="text-xs font-semibold text-tinta block">Fim</label>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none bg-fundo border border-linha"
-            />
-          </div>
-        </div>
-      </div>
+      <SeletorPeriodo
+        dataInicio={dataInicio}
+        dataFim={dataFim}
+        onMudar={(inicio, fim) => {
+          setDataInicio(inicio);
+          setDataFim(fim);
+        }}
+      />
 
       <div className="bg-marca rounded-2xl px-4 py-4 text-white flex items-center justify-between">
         <span className="text-sm font-semibold opacity-90">Total do período (todas as empresas)</span>

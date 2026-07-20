@@ -14,6 +14,20 @@ export function hojeISO(): string {
   return local.toISOString().slice(0, 10);
 }
 
+export function somarDiasISO(data: string, dias: number): string {
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const d = new Date(ano, mes - 1, dia);
+  d.setDate(d.getDate() + dias);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export function primeiroDiaDoMesISO(data: string): string {
+  return `${data.slice(0, 7)}-01`;
+}
+
 export function formatarDataCurta(data: string): string {
   const [ano, mes, dia] = data.split("-");
   return `${dia}/${mes}/${ano}`;
