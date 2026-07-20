@@ -9,6 +9,7 @@ import LinhaItemRapido from "../components/LinhaItemRapido";
 import { formatarMoeda } from "../lib/format";
 import { calcularTotalMes, valorLancamento } from "../lib/calculos";
 import { ROTULO_CANAL, ROTULO_FORMA_PAGAMENTO } from "../lib/rotulos";
+import ZonaDeRiscoLancamentos from "../components/ZonaDeRiscoLancamentos";
 
 const CATEGORIAS: Categoria[] = ["prato", "bebida", "doce"];
 
@@ -181,6 +182,8 @@ export default function Lancamentos({ data, onMudarData }: { data: string; onMud
               })}
             </div>
           )}
+
+          <ZonaDeRiscoLancamentos />
         </div>
       </div>
 

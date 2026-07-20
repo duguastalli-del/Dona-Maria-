@@ -7,10 +7,13 @@ import {
   apagarTodosLancamentos,
   atualizarItem,
   atualizarLancamento,
+  type BackupApagados,
   definirStatusEmpresa,
   definirTrocoInicial,
+  descartarBackupApagados,
   fecharDia,
   garantirDadosIniciais,
+  getBackupApagados,
   getDias,
   getEmpresas,
   getItens,
@@ -21,6 +24,7 @@ import {
   reabrirQuitacao,
   removerItem,
   removerLancamento,
+  restaurarBackupApagados,
 } from "../lib/storage";
 
 garantirDadosIniciais();
@@ -39,6 +43,9 @@ interface DadosContextValor {
   editarLancamento: (id: string, alteracoes: Partial<Lancamento>) => void;
   excluirLancamento: (id: string) => void;
   apagarTodosLancamentosPor: () => void;
+  backupApagados: BackupApagados | null;
+  restaurarBackupPor: () => void;
+  descartarBackupPor: () => void;
   quitarLancamentoPor: (id: string, forma: FormaPagamento, dataQuitacao: string) => void;
   reabrirQuitacaoPor: (id: string) => void;
   quitarContaEmpresaPor: (empresaNome: string, forma: FormaPagamento, dataQuitacao: string) => void;
@@ -55,6 +62,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   const [lancamentos, setLancamentos] = useState<Lancamento[]>(() => getLancamentos());
   const [dias, setDias] = useState<DiaStatus[]>(() => getDias());
   const [empresas, setEmpresas] = useState<Empresa[]>(() => getEmpresas());
+  const [backupApagados, setBackupApagados] = useState<BackupApagados | null>(() => getBackupApagados());
 
   const recarregar = useCallback(() => {
     setLancamentos(getLancamentos());
@@ -112,8 +120,20 @@ export function DadosProvider({ children }: { children: ReactNode }) {
 
   const apagarTodosLancamentosPor = useCallback(() => {
     apagarTodosLancamentos();
+    setBackupApagados(getBackupApagados());
     recarregar();
   }, [recarregar]);
+
+  const restaurarBackupPor = useCallback(() => {
+    restaurarBackupApagados();
+    setBackupApagados(null);
+    recarregar();
+  }, [recarregar]);
+
+  const descartarBackupPor = useCallback(() => {
+    descartarBackupApagados();
+    setBackupApagados(null);
+  }, []);
 
   const quitarLancamentoPor = useCallback(
     (id: string, forma: FormaPagamento, dataQuitacao: string) => {
@@ -190,6 +210,9 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       editarLancamento,
       excluirLancamento,
       apagarTodosLancamentosPor,
+      backupApagados,
+      restaurarBackupPor,
+      descartarBackupPor,
       quitarLancamentoPor,
       reabrirQuitacaoPor,
       quitarContaEmpresaPor,
@@ -212,6 +235,9 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       editarLancamento,
       excluirLancamento,
       apagarTodosLancamentosPor,
+      backupApagados,
+      restaurarBackupPor,
+      descartarBackupPor,
       quitarLancamentoPor,
       reabrirQuitacaoPor,
       quitarContaEmpresaPor,

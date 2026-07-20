@@ -9,7 +9,14 @@ const CHAVES = {
   empresas: "dm:empresas",
   seed: "dm:seed_v1",
   seedEmpresas: "dm:seed_empresas_v1",
+  backup: "dm:backup_apagados",
 } as const;
+
+export interface BackupApagados {
+  lancamentos: Lancamento[];
+  dias: DiaStatus[];
+  em: string; // ISO timestamp
+}
 
 function ler<T>(chave: string, padrao: T): T {
   const bruto = localStorage.getItem(chave);
@@ -102,8 +109,30 @@ export function removerLancamento(id: string): void {
 }
 
 export function apagarTodosLancamentos(): void {
+  const backup: BackupApagados = {
+    lancamentos: getLancamentos(),
+    dias: getDias(),
+    em: new Date().toISOString(),
+  };
+  gravar(CHAVES.backup, backup);
   salvarLancamentos([]);
   salvarDias([]);
+}
+
+export function getBackupApagados(): BackupApagados | null {
+  return ler(CHAVES.backup, null as BackupApagados | null);
+}
+
+export function restaurarBackupApagados(): void {
+  const backup = getBackupApagados();
+  if (!backup) return;
+  salvarLancamentos(backup.lancamentos);
+  salvarDias(backup.dias);
+  localStorage.removeItem(CHAVES.backup);
+}
+
+export function descartarBackupApagados(): void {
+  localStorage.removeItem(CHAVES.backup);
 }
 
 export function quitarLancamento(id: string, formaPagamento: FormaPagamento, dataQuitacao: string): void {

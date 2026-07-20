@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { AlertTriangle, Check, Plus, Trash2 } from "lucide-react";
+import { Check, Plus, Trash2 } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import { NOMES_CATEGORIA } from "../lib/itens";
 import type { Categoria } from "../lib/types";
+import ZonaDeRiscoLancamentos from "../components/ZonaDeRiscoLancamentos";
 
 const CATEGORIAS: Categoria[] = ["prato", "bebida", "doce"];
 
@@ -17,7 +18,7 @@ interface NovoItemRascunho {
 }
 
 export default function Cardapio() {
-  const { itens, lancamentos, editarItem, criarItem, excluirItem, apagarTodosLancamentosPor } = useDados();
+  const { itens, lancamentos, editarItem, criarItem, excluirItem } = useDados();
   const [rascunhos, setRascunhos] = useState<Record<string, Rascunho>>({});
   const [novosItens, setNovosItens] = useState<Record<Categoria, NovoItemRascunho>>({
     prato: { nome: "", preco: "" },
@@ -68,16 +69,6 @@ export default function Cardapio() {
     if (!nome || Number.isNaN(preco) || preco < 0) return;
     criarItem(nome, categoria, preco);
     setNovosItens((atual) => ({ ...atual, [categoria]: { nome: "", preco: "" } }));
-  }
-
-  function apagarVendas() {
-    if (
-      confirm(
-        "Isso vai apagar TODOS os lançamentos de vendas (inclusive os de exemplo) e reabrir todos os dias fechados. Essa ação não pode ser desfeita. Confirmar?",
-      )
-    ) {
-      apagarTodosLancamentosPor();
-    }
   }
 
   return (
@@ -180,21 +171,7 @@ export default function Cardapio() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-erro/30 px-4 py-3 flex flex-col gap-2 md:max-w-md">
-        <h3 className="flex items-center gap-1.5 text-xs font-bold text-erro uppercase tracking-wide">
-          <AlertTriangle size={14} /> Zona de risco
-        </h3>
-        <p className="text-xs text-apoio">
-          Apaga todos os lançamentos de venda (inclusive os dados de exemplo) e reabre os dias fechados. Use antes de
-          começar a usar de verdade, ou depois de um treinamento.
-        </p>
-        <button
-          onClick={apagarVendas}
-          className="w-full rounded-xl py-2.5 text-sm font-bold text-erro border border-erro"
-        >
-          Apagar todos os lançamentos
-        </button>
-      </div>
+      <ZonaDeRiscoLancamentos />
     </div>
   );
 }
