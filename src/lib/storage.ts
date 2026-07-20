@@ -1,12 +1,14 @@
-import type { DiaStatus, FormaPagamento, Item, Lancamento } from "./types";
+import type { DiaStatus, Empresa, FormaPagamento, Item, Lancamento } from "./types";
 import { ITENS_PADRAO } from "./itens";
-import { criarLancamentosExemplo, diaAnteontemExemplo } from "./exemplo";
+import { criarLancamentosExemplo, diaAnteontemExemplo, EMPRESAS_EXEMPLO } from "./exemplo";
 
 const CHAVES = {
   itens: "dm:itens",
   lancamentos: "dm:lancamentos",
   dias: "dm:dias",
+  empresas: "dm:empresas",
   seed: "dm:seed_v1",
+  seedEmpresas: "dm:seed_empresas_v1",
 } as const;
 
 function ler<T>(chave: string, padrao: T): T {
@@ -37,6 +39,10 @@ export function garantirDadosIniciais(): void {
     };
     gravar(CHAVES.dias, [diaExemploFechado]);
     localStorage.setItem(CHAVES.seed, "1");
+  }
+  if (!localStorage.getItem(CHAVES.seedEmpresas)) {
+    gravar(CHAVES.empresas, EMPRESAS_EXEMPLO);
+    localStorage.setItem(CHAVES.seedEmpresas, "1");
   }
 }
 
@@ -96,6 +102,32 @@ export function reabrirFiado(id: string): void {
     fiado_quitado_em: null,
     fiado_forma_pagamento: null,
   });
+}
+
+export function getEmpresas(): Empresa[] {
+  return ler(CHAVES.empresas, [] as Empresa[]);
+}
+
+function salvarEmpresas(empresas: Empresa[]): void {
+  gravar(CHAVES.empresas, empresas);
+}
+
+export function adicionarEmpresa(nome: string): Empresa {
+  const empresa: Empresa = {
+    id: crypto.randomUUID(),
+    nome,
+    ativa: true,
+    criado_em: new Date().toISOString(),
+  };
+  const empresas = getEmpresas();
+  empresas.push(empresa);
+  salvarEmpresas(empresas);
+  return empresa;
+}
+
+export function definirStatusEmpresa(id: string, ativa: boolean): void {
+  const empresas = getEmpresas().map((e) => (e.id === id ? { ...e, ativa } : e));
+  salvarEmpresas(empresas);
 }
 
 export function getDias(): DiaStatus[] {

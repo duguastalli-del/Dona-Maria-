@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import type { Canal, FormaPagamento, Item, Lancamento } from "../lib/types";
 import { CANAIS, FORMAS_PAGAMENTO, ROTULO_CANAL, ROTULO_FORMA_PAGAMENTO } from "../lib/rotulos";
 import { formatarMoeda } from "../lib/format";
+import { useDados } from "../contexts/DadosContext";
 
 interface Props {
   item: Item;
@@ -21,6 +22,7 @@ export default function ModalLancamento({
   onFechar,
   onSalvar,
 }: Props) {
+  const { empresas } = useDados();
   const [quantidade, setQuantidade] = useState(lancamentoExistente?.quantidade ?? quantidadeInicial ?? 1);
   const [valorUnitario, setValorUnitario] = useState(
     lancamentoExistente?.valor_unitario ?? item.valor_unitario_padrao,
@@ -36,6 +38,12 @@ export default function ModalLancamento({
   const isFiado = canal === "fiado";
   const isEmpresa = canal === "empresa";
   const total = quantidade * valorUnitario;
+
+  const empresasAtivas = empresas.filter((e) => e.ativa);
+  const empresaAtualEncerrada =
+    lancamentoExistente?.empresa_nome && !empresasAtivas.some((e) => e.nome === lancamentoExistente.empresa_nome)
+      ? lancamentoExistente.empresa_nome
+      : null;
 
   function salvar() {
     if (quantidade <= 0) {
@@ -128,14 +136,28 @@ export default function ModalLancamento({
 
         {isEmpresa && (
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-tinta block">Nome da empresa</label>
-            <input
-              type="text"
-              value={empresaNome}
-              onChange={(e) => setEmpresaNome(e.target.value)}
-              placeholder="Ex: Transportes ABC"
-              className="w-full rounded-xl px-3 py-3 text-base outline-none bg-fundo border border-linha"
-            />
+            <label className="text-xs font-semibold text-tinta block">Empresa</label>
+            {empresasAtivas.length === 0 && !empresaAtualEncerrada ? (
+              <p className="text-sm text-apoio bg-fundo border border-linha rounded-xl px-3 py-3">
+                Nenhuma empresa cadastrada ainda. Cadastre uma na aba Empresas.
+              </p>
+            ) : (
+              <select
+                value={empresaNome}
+                onChange={(e) => setEmpresaNome(e.target.value)}
+                className="w-full rounded-xl px-3 py-3 text-base outline-none bg-fundo border border-linha"
+              >
+                <option value="">Selecione a empresa</option>
+                {empresaAtualEncerrada && (
+                  <option value={empresaAtualEncerrada}>{empresaAtualEncerrada} (encerrada)</option>
+                )}
+                {empresasAtivas.map((e) => (
+                  <option key={e.id} value={e.nome}>
+                    {e.nome}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         )}
 

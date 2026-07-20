@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, RotateCcw, XCircle } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import SeletorPeriodo from "../components/SeletorPeriodo";
 import { calcularTotaisPorEmpresa } from "../lib/calculos";
@@ -7,11 +7,13 @@ import { formatarDataCurta, formatarMoeda, hojeISO, primeiroDiaDoMesISO } from "
 import { FORMAS_PAGAMENTO, ROTULO_FORMA_PAGAMENTO } from "../lib/rotulos";
 
 export default function Empresas() {
-  const { lancamentos, itens } = useDados();
+  const { lancamentos, itens, empresas, criarEmpresa, definirStatusEmpresaPor } = useDados();
   const hoje = hojeISO();
   const [dataInicio, setDataInicio] = useState(primeiroDiaDoMesISO(hoje));
   const [dataFim, setDataFim] = useState(hoje);
   const [expandida, setExpandida] = useState<string | null>(null);
+  const [novoNome, setNovoNome] = useState("");
+  const [erroCadastro, setErroCadastro] = useState("");
 
   const totais = useMemo(
     () => calcularTotaisPorEmpresa(lancamentos, dataInicio, dataFim),
@@ -20,8 +22,89 @@ export default function Empresas() {
 
   const totalPeriodo = useMemo(() => totais.reduce((soma, e) => soma + e.total, 0), [totais]);
 
+  const empresasOrdenadas = useMemo(
+    () => [...empresas].sort((a, b) => Number(b.ativa) - Number(a.ativa) || a.nome.localeCompare(b.nome)),
+    [empresas],
+  );
+
+  function cadastrar() {
+    const nome = novoNome.trim();
+    if (!nome) {
+      setErroCadastro("Informe o nome da empresa.");
+      return;
+    }
+    if (empresas.some((e) => e.nome.toLowerCase() === nome.toLowerCase())) {
+      setErroCadastro("Já existe uma empresa com esse nome.");
+      return;
+    }
+    criarEmpresa(nome);
+    setNovoNome("");
+    setErroCadastro("");
+  }
+
   return (
     <div className="flex flex-col gap-4 pb-4">
+      <div className="bg-white rounded-2xl border border-linha px-4 py-3 flex flex-col gap-3">
+        <h3 className="text-xs font-bold text-apoio uppercase tracking-wide">Empresas cadastradas</h3>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={novoNome}
+            onChange={(e) => {
+              setNovoNome(e.target.value);
+              setErroCadastro("");
+            }}
+            onKeyDown={(e) => e.key === "Enter" && cadastrar()}
+            placeholder="Nome da nova empresa"
+            className="flex-1 rounded-xl px-3 py-2.5 text-sm outline-none bg-fundo border border-linha"
+          />
+          <button
+            onClick={cadastrar}
+            className="shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-bold text-white bg-marca"
+          >
+            <Plus size={16} /> Cadastrar
+          </button>
+        </div>
+        {erroCadastro && <p className="text-xs text-erro">{erroCadastro}</p>}
+
+        {empresasOrdenadas.length === 0 ? (
+          <p className="text-sm text-apoio">Nenhuma empresa cadastrada ainda.</p>
+        ) : (
+          <div className="divide-y divide-linha">
+            {empresasOrdenadas.map((e) => (
+              <div key={e.id} className="flex items-center justify-between py-2.5 gap-2">
+                <div className="min-w-0 flex items-center gap-2">
+                  <span className={`text-sm font-semibold truncate ${e.ativa ? "text-tinta" : "text-apoio line-through"}`}>
+                    {e.nome}
+                  </span>
+                  {!e.ativa && (
+                    <span className="shrink-0 text-[10px] font-bold uppercase text-apoio bg-fundo border border-linha rounded-full px-2 py-0.5">
+                      Encerrada
+                    </span>
+                  )}
+                </div>
+                {e.ativa ? (
+                  <button
+                    onClick={() => definirStatusEmpresaPor(e.id, false)}
+                    className="shrink-0 flex items-center gap-1 text-xs font-semibold text-erro"
+                  >
+                    <XCircle size={14} /> Encerrar
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => definirStatusEmpresaPor(e.id, true)}
+                    className="shrink-0 flex items-center gap-1 text-xs font-semibold text-marca"
+                  >
+                    <RotateCcw size={14} /> Reativar
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <SeletorPeriodo
         dataInicio={dataInicio}
         dataFim={dataFim}

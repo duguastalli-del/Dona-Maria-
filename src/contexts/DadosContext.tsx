@@ -1,12 +1,15 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import type { DiaStatus, FormaPagamento, Item, Lancamento } from "../lib/types";
+import type { DiaStatus, Empresa, FormaPagamento, Item, Lancamento } from "../lib/types";
 import {
+  adicionarEmpresa,
   adicionarLancamento,
   atualizarItem,
   atualizarLancamento,
+  definirStatusEmpresa,
   fecharDia,
   garantirDadosIniciais,
   getDias,
+  getEmpresas,
   getItens,
   getLancamentos,
   reabrirDia,
@@ -21,7 +24,10 @@ interface DadosContextValor {
   itens: Item[];
   lancamentos: Lancamento[];
   dias: DiaStatus[];
+  empresas: Empresa[];
   editarItem: (id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>) => void;
+  criarEmpresa: (nome: string) => void;
+  definirStatusEmpresaPor: (id: string, ativa: boolean) => void;
   criarLancamento: (entrada: Omit<Lancamento, "id" | "criado_em">) => void;
   editarLancamento: (id: string, alteracoes: Partial<Lancamento>) => void;
   excluirLancamento: (id: string) => void;
@@ -38,6 +44,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   const [itens, setItens] = useState<Item[]>(() => getItens());
   const [lancamentos, setLancamentos] = useState<Lancamento[]>(() => getLancamentos());
   const [dias, setDias] = useState<DiaStatus[]>(() => getDias());
+  const [empresas, setEmpresas] = useState<Empresa[]>(() => getEmpresas());
 
   const recarregar = useCallback(() => {
     setLancamentos(getLancamentos());
@@ -47,6 +54,16 @@ export function DadosProvider({ children }: { children: ReactNode }) {
   const editarItem = useCallback((id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>) => {
     atualizarItem(id, alteracoes);
     setItens(getItens());
+  }, []);
+
+  const criarEmpresa = useCallback((nome: string) => {
+    adicionarEmpresa(nome);
+    setEmpresas(getEmpresas());
+  }, []);
+
+  const definirStatusEmpresaPor = useCallback((id: string, ativa: boolean) => {
+    definirStatusEmpresa(id, ativa);
+    setEmpresas(getEmpresas());
   }, []);
 
   const criarLancamento = useCallback(
@@ -115,7 +132,10 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       itens,
       lancamentos,
       dias,
+      empresas,
       editarItem,
+      criarEmpresa,
+      definirStatusEmpresaPor,
       criarLancamento,
       editarLancamento,
       excluirLancamento,
@@ -129,7 +149,10 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       itens,
       lancamentos,
       dias,
+      empresas,
       editarItem,
+      criarEmpresa,
+      definirStatusEmpresaPor,
       criarLancamento,
       editarLancamento,
       excluirLancamento,

@@ -1,4 +1,4 @@
-import type { Lancamento } from "./types";
+import type { Empresa, Lancamento } from "./types";
 import { ITENS_PADRAO } from "./itens";
 
 function porId(itemId: string) {
@@ -116,3 +116,8 @@ export function criarLancamentosExemplo(): Lancamento[] {
 export function diaAnteontemExemplo(): string {
   return dataOffset(2);
 }
+
+export const EMPRESAS_EXEMPLO: Empresa[] = [
+  { id: crypto.randomUUID(), nome: "Transportadora Silva", ativa: true, criado_em: new Date().toISOString() },
+  { id: crypto.randomUUID(), nome: "Padaria Bom Pão", ativa: true, criado_em: new Date().toISOString() },
+];

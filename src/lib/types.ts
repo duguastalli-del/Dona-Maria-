@@ -27,6 +27,13 @@ export interface Lancamento {
   criado_em: string; // ISO timestamp
 }
 
+export interface Empresa {
+  id: string;
+  nome: string;
+  ativa: boolean;
+  criado_em: string; // ISO timestamp
+}
+
 export interface DiaStatus {
   data: string; // YYYY-MM-DD
   fechado: boolean;
