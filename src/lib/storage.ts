@@ -106,20 +106,29 @@ export function apagarTodosLancamentos(): void {
   salvarDias([]);
 }
 
-export function quitarFiado(id: string, formaPagamento: FormaPagamento, dataQuitacao: string): void {
+export function quitarLancamento(id: string, formaPagamento: FormaPagamento, dataQuitacao: string): void {
   atualizarLancamento(id, {
-    fiado_quitado: true,
-    fiado_quitado_em: dataQuitacao,
-    fiado_forma_pagamento: formaPagamento,
+    quitado: true,
+    quitado_em: dataQuitacao,
+    forma_pagamento_quitacao: formaPagamento,
   });
 }
 
-export function reabrirFiado(id: string): void {
+export function reabrirQuitacao(id: string): void {
   atualizarLancamento(id, {
-    fiado_quitado: false,
-    fiado_quitado_em: null,
-    fiado_forma_pagamento: null,
+    quitado: false,
+    quitado_em: null,
+    forma_pagamento_quitacao: null,
   });
+}
+
+export function quitarContaEmpresa(empresaNome: string, formaPagamento: FormaPagamento, dataQuitacao: string): void {
+  const lancamentos = getLancamentos().map((l) =>
+    l.canal === "empresa" && l.empresa_nome === empresaNome && !l.quitado
+      ? { ...l, quitado: true, quitado_em: dataQuitacao, forma_pagamento_quitacao: formaPagamento }
+      : l,
+  );
+  salvarLancamentos(lancamentos);
 }
 
 export function getEmpresas(): Empresa[] {

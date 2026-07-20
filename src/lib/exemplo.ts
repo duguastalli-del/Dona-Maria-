@@ -22,10 +22,10 @@ function novoLancamento(parcial: {
   canal: Lancamento["canal"];
   forma_pagamento?: Lancamento["forma_pagamento"];
   fiado_cliente?: string;
-  fiado_quitado?: boolean;
-  fiado_quitado_em?: string;
-  fiado_forma_pagamento?: Lancamento["forma_pagamento"];
   empresa_nome?: string;
+  quitado?: boolean;
+  quitado_em?: string;
+  forma_pagamento_quitacao?: Lancamento["forma_pagamento"];
   valor_unitario?: number;
 }): Lancamento {
   const item = porId(parcial.item_id);
@@ -38,10 +38,10 @@ function novoLancamento(parcial: {
     canal: parcial.canal,
     forma_pagamento: parcial.forma_pagamento ?? null,
     fiado_cliente: parcial.fiado_cliente ?? null,
-    fiado_quitado: parcial.fiado_quitado ?? false,
-    fiado_quitado_em: parcial.fiado_quitado_em ?? null,
-    fiado_forma_pagamento: parcial.fiado_forma_pagamento ?? null,
     empresa_nome: parcial.empresa_nome ?? null,
+    quitado: parcial.quitado ?? false,
+    quitado_em: parcial.quitado_em ?? null,
+    forma_pagamento_quitacao: parcial.forma_pagamento_quitacao ?? null,
     criado_em: new Date().toISOString(),
   };
 }
@@ -88,9 +88,9 @@ export function criarLancamentosExemplo(): Lancamento[] {
       quantidade: 1,
       canal: "fiado",
       fiado_cliente: "João da Padaria",
-      fiado_quitado: true,
-      fiado_quitado_em: hoje,
-      fiado_forma_pagamento: "dinheiro",
+      quitado: true,
+      quitado_em: hoje,
+      forma_pagamento_quitacao: "dinheiro",
     }),
 
     // Dia anterior já fechado, pra demonstrar o Histórico
@@ -99,13 +99,16 @@ export function criarLancamentosExemplo(): Lancamento[] {
     novoLancamento({ data: anteontem, item_id: "cerveja-garrafa", quantidade: 8, canal: "salao", forma_pagamento: "dinheiro" }),
     novoLancamento({ data: anteontem, item_id: "brigadeiro", quantidade: 12, canal: "salao", forma_pagamento: "dinheiro" }),
 
-    // Empresa do mês passado, pra demonstrar o fechamento por período em Empresas
+    // Empresa do mês passado, já quitada (pra demonstrar que o saldo em aberto zera e o histórico continua)
     novoLancamento({
       data: mesPassado,
       item_id: "marmitex-g",
       quantidade: 6,
       canal: "empresa",
       empresa_nome: "Transportadora Silva",
+      quitado: true,
+      quitado_em: dataOffset(30),
+      forma_pagamento_quitacao: "pix",
     }),
   ];
 }

@@ -21,10 +21,10 @@ interface ResumoComum {
   total_geral: number;
   total_por_canal: TotaisPorCanal;
   vendas_por_forma_pagamento: TotaisPorFormaPagamento;
-  fiados_quitados_por_forma_pagamento: TotaisPorFormaPagamento;
+  quitados_por_forma_pagamento: TotaisPorFormaPagamento;
   total_por_forma_pagamento: TotaisPorFormaPagamento;
   fiado_aberto: number;
-  fiado_quitado: number;
+  quitado: number;
 }
 
 function LinhaValor({ rotulo, valor, destaque }: { rotulo: string; valor: number; destaque?: boolean }) {
@@ -85,19 +85,19 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
         total_geral: fechamentoDia.total_geral,
         total_por_canal: fechamentoDia.total_por_canal,
         vendas_por_forma_pagamento: fechamentoDia.vendas_dia_por_forma_pagamento,
-        fiados_quitados_por_forma_pagamento: fechamentoDia.fiados_quitados_hoje_por_forma_pagamento,
+        quitados_por_forma_pagamento: fechamentoDia.quitados_hoje_por_forma_pagamento,
         total_por_forma_pagamento: fechamentoDia.total_por_forma_pagamento,
         fiado_aberto: fechamentoDia.fiado_aberto,
-        fiado_quitado: fechamentoDia.fiado_quitado_hoje,
+        quitado: fechamentoDia.quitado_hoje,
       }
     : {
         total_geral: totaisPeriodo.total_geral,
         total_por_canal: totaisPeriodo.total_por_canal,
         vendas_por_forma_pagamento: totaisPeriodo.vendas_periodo_por_forma_pagamento,
-        fiados_quitados_por_forma_pagamento: totaisPeriodo.fiados_quitados_periodo_por_forma_pagamento,
+        quitados_por_forma_pagamento: totaisPeriodo.quitados_periodo_por_forma_pagamento,
         total_por_forma_pagamento: totaisPeriodo.total_por_forma_pagamento,
         fiado_aberto: totaisPeriodo.fiado_aberto_periodo,
-        fiado_quitado: totaisPeriodo.fiado_quitado_periodo,
+        quitado: totaisPeriodo.quitado_periodo,
       };
 
   const [dinheiroContado, setDinheiroContado] = useState<string>(
@@ -202,11 +202,11 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
           ))}
         </Cartao>
 
-        <Cartao titulo={`Fiados quitados no ${escopo} — por forma de pagamento`}>
+        <Cartao titulo={`Fiado/Empresa quitados no ${escopo} — por forma de pagamento`}>
           {FORMAS_PAGAMENTO.map((f) => (
-            <LinhaValor key={f} rotulo={ROTULO_FORMA_PAGAMENTO[f]} valor={resumo.fiados_quitados_por_forma_pagamento[f]} />
+            <LinhaValor key={f} rotulo={ROTULO_FORMA_PAGAMENTO[f]} valor={resumo.quitados_por_forma_pagamento[f]} />
           ))}
-          <LinhaValor rotulo={`Total quitado no ${escopo}`} valor={resumo.fiado_quitado} destaque />
+          <LinhaValor rotulo={`Total quitado no ${escopo}`} valor={resumo.quitado} destaque />
         </Cartao>
 
         <Cartao titulo="Total por forma de pagamento (geral)">
@@ -217,7 +217,6 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
 
         <Cartao titulo="Fiado">
           <LinhaValor rotulo={`Aberto (gerado no ${escopo}, ainda não pago)`} valor={resumo.fiado_aberto} />
-          <LinhaValor rotulo={`Quitado no ${escopo}`} valor={resumo.fiado_quitado} />
         </Cartao>
       </div>
 

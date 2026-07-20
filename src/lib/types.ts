@@ -20,10 +20,10 @@ export interface Lancamento {
   canal: Canal;
   forma_pagamento: FormaPagamento | null; // null quando canal = fiado ou empresa (pagam depois, por período)
   fiado_cliente: string | null;
-  fiado_quitado: boolean;
-  fiado_quitado_em: string | null; // YYYY-MM-DD
-  fiado_forma_pagamento: FormaPagamento | null;
   empresa_nome: string | null; // nome da empresa quando canal = empresa
+  quitado: boolean; // fiado ou empresa já pago (conta em aberto quitada)
+  quitado_em: string | null; // YYYY-MM-DD
+  forma_pagamento_quitacao: FormaPagamento | null;
   criado_em: string; // ISO timestamp
 }
 
@@ -51,9 +51,9 @@ export interface FechamentoDia {
   total_geral: number;
   total_por_canal: TotaisPorCanal;
   vendas_dia_por_forma_pagamento: TotaisPorFormaPagamento;
-  fiados_quitados_hoje_por_forma_pagamento: TotaisPorFormaPagamento;
+  quitados_hoje_por_forma_pagamento: TotaisPorFormaPagamento;
   total_por_forma_pagamento: TotaisPorFormaPagamento;
   fiado_aberto: number;
-  fiado_quitado_hoje: number;
+  quitado_hoje: number;
   dinheiro_esperado: number;
 }

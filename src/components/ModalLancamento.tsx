@@ -71,10 +71,10 @@ export default function ModalLancamento({
       canal,
       forma_pagamento: isFiado || isEmpresa ? null : formaPagamento,
       fiado_cliente: isFiado ? fiadoCliente.trim() : null,
-      fiado_quitado: lancamentoExistente?.fiado_quitado ?? false,
-      fiado_quitado_em: lancamentoExistente?.fiado_quitado_em ?? null,
-      fiado_forma_pagamento: lancamentoExistente?.fiado_forma_pagamento ?? null,
       empresa_nome: isEmpresa ? empresaNome.trim() : null,
+      quitado: lancamentoExistente?.quitado ?? false,
+      quitado_em: lancamentoExistente?.quitado_em ?? null,
+      forma_pagamento_quitacao: lancamentoExistente?.forma_pagamento_quitacao ?? null,
     });
   }
 

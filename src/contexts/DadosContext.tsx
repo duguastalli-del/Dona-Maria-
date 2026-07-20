@@ -15,11 +15,12 @@ import {
   getEmpresas,
   getItens,
   getLancamentos,
+  quitarContaEmpresa,
+  quitarLancamento,
   reabrirDia,
-  reabrirFiado,
+  reabrirQuitacao,
   removerItem,
   removerLancamento,
-  quitarFiado,
 } from "../lib/storage";
 
 garantirDadosIniciais();
@@ -38,8 +39,9 @@ interface DadosContextValor {
   editarLancamento: (id: string, alteracoes: Partial<Lancamento>) => void;
   excluirLancamento: (id: string) => void;
   apagarTodosLancamentosPor: () => void;
-  quitarFiadoPor: (id: string, forma: FormaPagamento, dataQuitacao: string) => void;
-  reabrirFiadoPor: (id: string) => void;
+  quitarLancamentoPor: (id: string, forma: FormaPagamento, dataQuitacao: string) => void;
+  reabrirQuitacaoPor: (id: string) => void;
+  quitarContaEmpresaPor: (empresaNome: string, forma: FormaPagamento, dataQuitacao: string) => void;
   fecharDiaPor: (data: string, dinheiroContado: number) => void;
   reabrirDiaPor: (data: string) => void;
   definirTrocoInicialPor: (data: string, valor: number) => void;
@@ -113,17 +115,25 @@ export function DadosProvider({ children }: { children: ReactNode }) {
     recarregar();
   }, [recarregar]);
 
-  const quitarFiadoPor = useCallback(
+  const quitarLancamentoPor = useCallback(
     (id: string, forma: FormaPagamento, dataQuitacao: string) => {
-      quitarFiado(id, forma, dataQuitacao);
+      quitarLancamento(id, forma, dataQuitacao);
       recarregar();
     },
     [recarregar],
   );
 
-  const reabrirFiadoPor = useCallback(
+  const reabrirQuitacaoPor = useCallback(
     (id: string) => {
-      reabrirFiado(id);
+      reabrirQuitacao(id);
+      recarregar();
+    },
+    [recarregar],
+  );
+
+  const quitarContaEmpresaPor = useCallback(
+    (empresaNome: string, forma: FormaPagamento, dataQuitacao: string) => {
+      quitarContaEmpresa(empresaNome, forma, dataQuitacao);
       recarregar();
     },
     [recarregar],
@@ -180,8 +190,9 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       editarLancamento,
       excluirLancamento,
       apagarTodosLancamentosPor,
-      quitarFiadoPor,
-      reabrirFiadoPor,
+      quitarLancamentoPor,
+      reabrirQuitacaoPor,
+      quitarContaEmpresaPor,
       fecharDiaPor,
       reabrirDiaPor,
       definirTrocoInicialPor,
@@ -201,8 +212,9 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       editarLancamento,
       excluirLancamento,
       apagarTodosLancamentosPor,
-      quitarFiadoPor,
-      reabrirFiadoPor,
+      quitarLancamentoPor,
+      reabrirQuitacaoPor,
+      quitarContaEmpresaPor,
       fecharDiaPor,
       reabrirDiaPor,
       definirTrocoInicialPor,

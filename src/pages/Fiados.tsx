@@ -6,22 +6,22 @@ import { formatarDataCurta, formatarMoeda } from "../lib/format";
 import ModalQuitarFiado from "../components/ModalQuitarFiado";
 
 export default function Fiados() {
-  const { itens, lancamentos, quitarFiadoPor } = useDados();
+  const { itens, lancamentos, quitarLancamentoPor } = useDados();
   const [quitando, setQuitando] = useState<Lancamento | null>(null);
 
   const fiadosAbertos = useMemo(
     () =>
       lancamentos
-        .filter((l) => l.canal === "fiado" && !l.fiado_quitado)
+        .filter((l) => l.canal === "fiado" && !l.quitado)
         .sort((a, b) => a.data.localeCompare(b.data)),
     [lancamentos],
   );
 
   const totalAberto = useMemo(() => calcularFiadoAbertoTotal(lancamentos), [lancamentos]);
 
-  function confirmarQuitacao(forma: Parameters<typeof quitarFiadoPor>[1], dataQuitacao: string) {
+  function confirmarQuitacao(forma: Parameters<typeof quitarLancamentoPor>[1], dataQuitacao: string) {
     if (!quitando) return;
-    quitarFiadoPor(quitando.id, forma, dataQuitacao);
+    quitarLancamentoPor(quitando.id, forma, dataQuitacao);
     setQuitando(null);
   }
 

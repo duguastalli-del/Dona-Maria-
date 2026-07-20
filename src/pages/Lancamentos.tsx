@@ -37,10 +37,10 @@ export default function Lancamentos({ data, onMudarData }: { data: string; onMud
       canal: "salao",
       forma_pagamento: "dinheiro",
       fiado_cliente: null,
-      fiado_quitado: false,
-      fiado_quitado_em: null,
-      fiado_forma_pagamento: null,
       empresa_nome: null,
+      quitado: false,
+      quitado_em: null,
+      forma_pagamento_quitacao: null,
     });
   }
 
@@ -79,8 +79,8 @@ export default function Lancamentos({ data, onMudarData }: { data: string; onMud
   }
 
   function rotuloCanalLinha(l: Lancamento): string {
-    if (l.canal === "fiado") return `${l.fiado_cliente}${l.fiado_quitado ? " · quitado" : " · em aberto"}`;
-    if (l.canal === "empresa") return `${l.empresa_nome}`;
+    if (l.canal === "fiado") return `${l.fiado_cliente}${l.quitado ? " · quitado" : " · em aberto"}`;
+    if (l.canal === "empresa") return `${l.empresa_nome}${l.quitado ? " · quitado" : ""}`;
     return ROTULO_FORMA_PAGAMENTO[l.forma_pagamento!];
   }
 

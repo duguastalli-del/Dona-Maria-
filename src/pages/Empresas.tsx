@@ -2,17 +2,20 @@ import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Plus, RotateCcw, XCircle } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import SeletorPeriodo from "../components/SeletorPeriodo";
-import { calcularTotaisPorEmpresa } from "../lib/calculos";
+import ModalQuitarEmpresa from "../components/ModalQuitarEmpresa";
+import { calcularSaldosEmpresas, calcularTotaisPorEmpresa } from "../lib/calculos";
 import { formatarDataCurta, formatarMoeda, hojeISO, primeiroDiaDoMesISO } from "../lib/format";
+import type { FormaPagamento } from "../lib/types";
 
 export default function Empresas() {
-  const { lancamentos, itens, empresas, criarEmpresa, definirStatusEmpresaPor } = useDados();
+  const { lancamentos, itens, empresas, criarEmpresa, definirStatusEmpresaPor, quitarContaEmpresaPor } = useDados();
   const hoje = hojeISO();
   const [dataInicio, setDataInicio] = useState(primeiroDiaDoMesISO(hoje));
   const [dataFim, setDataFim] = useState(hoje);
   const [expandida, setExpandida] = useState<string | null>(null);
   const [novoNome, setNovoNome] = useState("");
   const [erroCadastro, setErroCadastro] = useState("");
+  const [quitando, setQuitando] = useState<string | null>(null);
 
   const totais = useMemo(
     () => calcularTotaisPorEmpresa(lancamentos, dataInicio, dataFim),
@@ -20,6 +23,10 @@ export default function Empresas() {
   );
 
   const totalPeriodo = useMemo(() => totais.reduce((soma, e) => soma + e.total, 0), [totais]);
+
+  const saldos = useMemo(() => calcularSaldosEmpresas(lancamentos), [lancamentos]);
+  const saldoPorEmpresa = useMemo(() => new Map(saldos.map((s) => [s.empresa_nome, s.saldo])), [saldos]);
+  const saldoQuitando = quitando ? (saldoPorEmpresa.get(quitando) ?? 0) : 0;
 
   const empresasOrdenadas = useMemo(
     () => [...empresas].sort((a, b) => Number(b.ativa) - Number(a.ativa) || a.nome.localeCompare(b.nome)),
@@ -39,6 +46,12 @@ export default function Empresas() {
     criarEmpresa(nome);
     setNovoNome("");
     setErroCadastro("");
+  }
+
+  function confirmarQuitacao(forma: FormaPagamento, dataQuitacao: string) {
+    if (!quitando) return;
+    quitarContaEmpresaPor(quitando, forma, dataQuitacao);
+    setQuitando(null);
   }
 
   return (
@@ -71,35 +84,53 @@ export default function Empresas() {
           <p className="text-sm text-apoio">Nenhuma empresa cadastrada ainda.</p>
         ) : (
           <div className="divide-y divide-linha">
-            {empresasOrdenadas.map((e) => (
-              <div key={e.id} className="flex items-center justify-between py-2.5 gap-2">
-                <div className="min-w-0 flex items-center gap-2">
-                  <span className={`text-sm font-semibold truncate ${e.ativa ? "text-tinta" : "text-apoio line-through"}`}>
-                    {e.nome}
-                  </span>
-                  {!e.ativa && (
-                    <span className="shrink-0 text-[10px] font-bold uppercase text-apoio bg-fundo border border-linha rounded-full px-2 py-0.5">
-                      Encerrada
+            {empresasOrdenadas.map((e) => {
+              const saldo = saldoPorEmpresa.get(e.nome) ?? 0;
+              return (
+                <div key={e.id} className="flex items-center justify-between py-2.5 gap-2 flex-wrap">
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span
+                      className={`text-sm font-semibold truncate ${e.ativa ? "text-tinta" : "text-apoio line-through"}`}
+                    >
+                      {e.nome}
                     </span>
-                  )}
+                    {!e.ativa && (
+                      <span className="shrink-0 text-[10px] font-bold uppercase text-apoio bg-fundo border border-linha rounded-full px-2 py-0.5">
+                        Encerrada
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {saldo > 0 && (
+                      <>
+                        <span className="text-sm font-bold text-tinta">{formatarMoeda(saldo)}</span>
+                        <button
+                          onClick={() => setQuitando(e.nome)}
+                          className="rounded-lg px-3 py-1.5 text-xs font-bold text-white bg-marca"
+                        >
+                          Quitar
+                        </button>
+                      </>
+                    )}
+                    {e.ativa ? (
+                      <button
+                        onClick={() => definirStatusEmpresaPor(e.id, false)}
+                        className="flex items-center gap-1 text-xs font-semibold text-erro"
+                      >
+                        <XCircle size={14} /> Encerrar
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => definirStatusEmpresaPor(e.id, true)}
+                        className="flex items-center gap-1 text-xs font-semibold text-marca"
+                      >
+                        <RotateCcw size={14} /> Reativar
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {e.ativa ? (
-                  <button
-                    onClick={() => definirStatusEmpresaPor(e.id, false)}
-                    className="shrink-0 flex items-center gap-1 text-xs font-semibold text-erro"
-                  >
-                    <XCircle size={14} /> Encerrar
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => definirStatusEmpresaPor(e.id, true)}
-                    className="shrink-0 flex items-center gap-1 text-xs font-semibold text-marca"
-                  >
-                    <RotateCcw size={14} /> Reativar
-                  </button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -117,6 +148,10 @@ export default function Empresas() {
         <span className="text-sm font-semibold opacity-90">Total do período (todas as empresas)</span>
         <span className="text-xl font-bold">{formatarMoeda(totalPeriodo)}</span>
       </div>
+      <p className="text-xs text-apoio px-1 -mt-2">
+        Esse total é o histórico de vendas no período (faturamento), independente de já ter sido quitado. O saldo
+        ainda em aberto de cada empresa aparece lá em cima, em "Empresas cadastradas".
+      </p>
 
       {totais.length === 0 ? (
         <p className="text-sm text-apoio px-1">Nenhuma venda para empresas nesse período.</p>
@@ -171,12 +206,21 @@ export default function Empresas() {
                           .map((l) => {
                             const item = itens.find((i) => i.id === l.item_id);
                             return (
-                              <div key={l.id} className="flex items-center justify-between py-2 text-sm">
-                                <span className="text-tinta">
+                              <div key={l.id} className="flex items-center justify-between py-2 text-sm gap-2">
+                                <span className="text-tinta truncate">
                                   {formatarDataCurta(l.data)} · {l.quantidade}x {item?.nome ?? "Item"}
                                 </span>
-                                <span className="font-semibold text-tinta">
-                                  {formatarMoeda(l.quantidade * l.valor_unitario)}
+                                <span className="flex items-center gap-2 shrink-0">
+                                  <span
+                                    className={`text-[10px] font-bold uppercase rounded-full px-2 py-0.5 ${
+                                      l.quitado ? "bg-sucesso/10 text-sucesso" : "bg-aviso/10 text-aviso"
+                                    }`}
+                                  >
+                                    {l.quitado ? "Pago" : "Pendente"}
+                                  </span>
+                                  <span className="font-semibold text-tinta">
+                                    {formatarMoeda(l.quantidade * l.valor_unitario)}
+                                  </span>
                                 </span>
                               </div>
                             );
@@ -189,6 +233,15 @@ export default function Empresas() {
             );
           })}
         </div>
+      )}
+
+      {quitando && (
+        <ModalQuitarEmpresa
+          empresaNome={quitando}
+          saldo={saldoQuitando}
+          onFechar={() => setQuitando(null)}
+          onConfirmar={confirmarQuitacao}
+        />
       )}
     </div>
   );
