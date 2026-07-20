@@ -39,6 +39,7 @@ export interface DiaStatus {
   fechado: boolean;
   dinheiro_contado: number | null;
   fechado_em: string | null; // ISO timestamp
+  troco_inicial: number | null; // fundo de troco colocado no caixa no início do dia — não é faturamento
 }
 
 export type TotaisPorFormaPagamento = Record<FormaPagamento, number>;

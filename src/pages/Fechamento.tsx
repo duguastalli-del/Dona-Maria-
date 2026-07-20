@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Lock, Unlock } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import SeletorData from "../components/SeletorData";
@@ -48,7 +48,7 @@ function Cartao({ titulo, children }: { titulo: string; children: React.ReactNod
 }
 
 export default function Fechamento({ data, onMudarData }: { data: string; onMudarData: (data: string) => void }) {
-  const { lancamentos, diaStatus, fecharDiaPor, reabrirDiaPor } = useDados();
+  const { lancamentos, diaStatus, fecharDiaPor, reabrirDiaPor, definirTrocoInicialPor } = useDados();
   const [modo, setModo] = useState<Modo>("dia");
   const [inicioPersonalizado, setInicioPersonalizado] = useState(primeiroDiaDoMesISO(hojeISO()));
   const [fimPersonalizado, setFimPersonalizado] = useState(hojeISO());
@@ -103,10 +103,25 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
   const [dinheiroContado, setDinheiroContado] = useState<string>(
     status.dinheiro_contado != null ? String(status.dinheiro_contado) : "",
   );
+  const [trocoInicial, setTrocoInicial] = useState<string>(
+    status.troco_inicial != null ? String(status.troco_inicial) : "",
+  );
+
+  useEffect(() => {
+    setDinheiroContado(status.dinheiro_contado != null ? String(status.dinheiro_contado) : "");
+    setTrocoInicial(status.troco_inicial != null ? String(status.troco_inicial) : "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, status.dinheiro_contado, status.troco_inicial]);
 
   const dinheiroContadoNum = Number(dinheiroContado.replace(",", "."));
   const dinheiroValido = dinheiroContado.trim() !== "" && !Number.isNaN(dinheiroContadoNum);
-  const diferenca = dinheiroValido ? dinheiroContadoNum - fechamentoDia.dinheiro_esperado : null;
+  const trocoInicialNum = Number(trocoInicial.replace(",", ".")) || 0;
+  const dinheiroEsperadoTotal = fechamentoDia.dinheiro_esperado + trocoInicialNum;
+  const diferenca = dinheiroValido ? dinheiroContadoNum - dinheiroEsperadoTotal : null;
+
+  function salvarTroco() {
+    definirTrocoInicialPor(data, trocoInicialNum);
+  }
 
   function pedirFechamento() {
     if (!dinheiroValido) {
@@ -209,7 +224,30 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
       {ehDia && (
         <div className="bg-white rounded-2xl border border-linha px-4 py-3 flex flex-col gap-3 md:max-w-md">
           <h3 className="text-xs font-bold text-apoio uppercase tracking-wide">Conferência de caixa (dinheiro)</h3>
-          <LinhaValor rotulo="Dinheiro esperado" valor={fechamentoDia.dinheiro_esperado} destaque />
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-tinta block">Troco inicial (fundo de caixa)</label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
+              value={trocoInicial}
+              onChange={(e) => setTrocoInicial(e.target.value)}
+              onBlur={salvarTroco}
+              onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+              disabled={status.fechado}
+              placeholder="0,00"
+              className="w-full rounded-xl px-3 py-3 text-base outline-none bg-fundo border border-linha disabled:opacity-60"
+            />
+            <p className="text-xs text-apoio">
+              Dinheiro colocado no caixa pra dar troco — não entra no total vendido, só na conferência.
+            </p>
+          </div>
+
+          <LinhaValor rotulo="Vendas em dinheiro" valor={fechamentoDia.dinheiro_esperado} />
+          <LinhaValor rotulo="+ Troco inicial" valor={trocoInicialNum} />
+          <LinhaValor rotulo="Dinheiro esperado no caixa" valor={dinheiroEsperadoTotal} destaque />
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-tinta block">Dinheiro contado no caixa</label>

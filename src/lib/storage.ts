@@ -36,6 +36,7 @@ export function garantirDadosIniciais(): void {
       fechado: true,
       dinheiro_contado: 305,
       fechado_em: new Date().toISOString(),
+      troco_inicial: null,
     };
     gravar(CHAVES.dias, [diaExemploFechado]);
     localStorage.setItem(CHAVES.seed, "1");
@@ -157,28 +158,32 @@ function salvarDias(dias: DiaStatus[]): void {
 
 export function getDiaStatus(data: string): DiaStatus {
   const existente = getDias().find((d) => d.data === data);
-  return existente ?? { data, fechado: false, dinheiro_contado: null, fechado_em: null };
+  return existente ?? { data, fechado: false, dinheiro_contado: null, fechado_em: null, troco_inicial: null };
 }
 
-export function fecharDia(data: string, dinheiroContado: number): void {
-  const dias = getDias();
-  const idx = dias.findIndex((d) => d.data === data);
-  const status: DiaStatus = {
-    data,
-    fechado: true,
-    dinheiro_contado: dinheiroContado,
-    fechado_em: new Date().toISOString(),
-  };
-  if (idx >= 0) dias[idx] = status;
-  else dias.push(status);
-  salvarDias(dias);
-}
-
-export function reabrirDia(data: string): void {
+function atualizarDia(data: string, alteracoes: Partial<Omit<DiaStatus, "data">>): void {
   const dias = getDias();
   const idx = dias.findIndex((d) => d.data === data);
   if (idx >= 0) {
-    dias[idx] = { ...dias[idx], fechado: false, fechado_em: null };
-    salvarDias(dias);
+    dias[idx] = { ...dias[idx], ...alteracoes };
+  } else {
+    dias.push({ data, fechado: false, dinheiro_contado: null, fechado_em: null, troco_inicial: null, ...alteracoes });
   }
+  salvarDias(dias);
+}
+
+export function definirTrocoInicial(data: string, valor: number): void {
+  atualizarDia(data, { troco_inicial: valor });
+}
+
+export function fecharDia(data: string, dinheiroContado: number): void {
+  atualizarDia(data, {
+    fechado: true,
+    dinheiro_contado: dinheiroContado,
+    fechado_em: new Date().toISOString(),
+  });
+}
+
+export function reabrirDia(data: string): void {
+  atualizarDia(data, { fechado: false, fechado_em: null });
 }

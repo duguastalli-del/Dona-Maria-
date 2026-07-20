@@ -8,6 +8,7 @@ import {
   atualizarItem,
   atualizarLancamento,
   definirStatusEmpresa,
+  definirTrocoInicial,
   fecharDia,
   garantirDadosIniciais,
   getDias,
@@ -41,6 +42,7 @@ interface DadosContextValor {
   reabrirFiadoPor: (id: string) => void;
   fecharDiaPor: (data: string, dinheiroContado: number) => void;
   reabrirDiaPor: (data: string) => void;
+  definirTrocoInicialPor: (data: string, valor: number) => void;
   diaStatus: (data: string) => DiaStatus;
 }
 
@@ -143,8 +145,23 @@ export function DadosProvider({ children }: { children: ReactNode }) {
     [recarregar],
   );
 
+  const definirTrocoInicialPor = useCallback(
+    (data: string, valor: number) => {
+      definirTrocoInicial(data, valor);
+      recarregar();
+    },
+    [recarregar],
+  );
+
   const diaStatus = useCallback(
-    (data: string): DiaStatus => dias.find((d) => d.data === data) ?? { data, fechado: false, dinheiro_contado: null, fechado_em: null },
+    (data: string): DiaStatus =>
+      dias.find((d) => d.data === data) ?? {
+        data,
+        fechado: false,
+        dinheiro_contado: null,
+        fechado_em: null,
+        troco_inicial: null,
+      },
     [dias],
   );
 
@@ -167,6 +184,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       reabrirFiadoPor,
       fecharDiaPor,
       reabrirDiaPor,
+      definirTrocoInicialPor,
       diaStatus,
     }),
     [
@@ -187,6 +205,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       reabrirFiadoPor,
       fecharDiaPor,
       reabrirDiaPor,
+      definirTrocoInicialPor,
       diaStatus,
     ],
   );
