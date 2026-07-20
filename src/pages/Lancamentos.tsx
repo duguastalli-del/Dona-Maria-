@@ -80,7 +80,7 @@ export default function Lancamentos({ data, onMudarData }: { data: string; onMud
 
   function rotuloCanalLinha(l: Lancamento): string {
     if (l.canal === "fiado") return `${l.fiado_cliente}${l.fiado_quitado ? " · quitado" : " · em aberto"}`;
-    if (l.canal === "empresa") return `${l.empresa_nome} · ${ROTULO_FORMA_PAGAMENTO[l.forma_pagamento!]}`;
+    if (l.canal === "empresa") return `${l.empresa_nome}`;
     return ROTULO_FORMA_PAGAMENTO[l.forma_pagamento!];
   }
 

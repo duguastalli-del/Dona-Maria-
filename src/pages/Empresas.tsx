@@ -4,7 +4,6 @@ import { useDados } from "../contexts/DadosContext";
 import SeletorPeriodo from "../components/SeletorPeriodo";
 import { calcularTotaisPorEmpresa } from "../lib/calculos";
 import { formatarDataCurta, formatarMoeda, hojeISO, primeiroDiaDoMesISO } from "../lib/format";
-import { FORMAS_PAGAMENTO, ROTULO_FORMA_PAGAMENTO } from "../lib/rotulos";
 
 export default function Empresas() {
   const { lancamentos, itens, empresas, criarEmpresa, definirStatusEmpresaPor } = useDados();
@@ -143,31 +142,46 @@ export default function Empresas() {
 
                 {aberta && (
                   <div className="px-4 pb-4 border-t border-linha pt-3 flex flex-col gap-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      {FORMAS_PAGAMENTO.map((f) => (
-                        <div key={f} className="bg-fundo rounded-xl px-2.5 py-2 text-center">
-                          <p className="text-[10px] font-semibold text-apoio uppercase">{ROTULO_FORMA_PAGAMENTO[f]}</p>
-                          <p className="text-sm font-bold text-tinta">{formatarMoeda(e.por_forma_pagamento[f])}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="divide-y divide-linha">
-                      {[...e.lancamentos]
-                        .sort((a, b) => a.data.localeCompare(b.data))
-                        .map((l) => {
-                          const item = itens.find((i) => i.id === l.item_id);
+                    <div>
+                      <h4 className="text-[10px] font-bold text-apoio uppercase tracking-wide mb-1">
+                        Quantidade por item (pra fatura)
+                      </h4>
+                      <div className="divide-y divide-linha">
+                        {e.por_item.map((ri) => {
+                          const item = itens.find((i) => i.id === ri.item_id);
                           return (
-                            <div key={l.id} className="flex items-center justify-between py-2 text-sm">
+                            <div key={ri.item_id} className="flex items-center justify-between py-1.5 text-sm">
                               <span className="text-tinta">
-                                {formatarDataCurta(l.data)} · {l.quantidade}x {item?.nome ?? "Item"}
+                                {ri.quantidade}x {item?.nome ?? "Item"}
                               </span>
-                              <span className="font-semibold text-tinta">
-                                {formatarMoeda(l.quantidade * l.valor_unitario)}
-                              </span>
+                              <span className="font-semibold text-tinta">{formatarMoeda(ri.total)}</span>
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-[10px] font-bold text-apoio uppercase tracking-wide mb-1">
+                        Lançamentos do período
+                      </h4>
+                      <div className="divide-y divide-linha">
+                        {[...e.lancamentos]
+                          .sort((a, b) => a.data.localeCompare(b.data))
+                          .map((l) => {
+                            const item = itens.find((i) => i.id === l.item_id);
+                            return (
+                              <div key={l.id} className="flex items-center justify-between py-2 text-sm">
+                                <span className="text-tinta">
+                                  {formatarDataCurta(l.data)} · {l.quantidade}x {item?.nome ?? "Item"}
+                                </span>
+                                <span className="font-semibold text-tinta">
+                                  {formatarMoeda(l.quantidade * l.valor_unitario)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                      </div>
                     </div>
                   </div>
                 )}

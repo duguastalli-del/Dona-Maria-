@@ -69,7 +69,7 @@ export default function ModalLancamento({
       quantidade,
       valor_unitario: valorUnitario,
       canal,
-      forma_pagamento: isFiado ? null : formaPagamento,
+      forma_pagamento: isFiado || isEmpresa ? null : formaPagamento,
       fiado_cliente: isFiado ? fiadoCliente.trim() : null,
       fiado_quitado: lancamentoExistente?.fiado_quitado ?? false,
       fiado_quitado_em: lancamentoExistente?.fiado_quitado_em ?? null,
@@ -161,7 +161,7 @@ export default function ModalLancamento({
           </div>
         )}
 
-        {isFiado ? (
+        {isFiado && (
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-tinta block">Nome do cliente (fiado)</label>
             <input
@@ -172,7 +172,15 @@ export default function ModalLancamento({
               className="w-full rounded-xl px-3 py-3 text-base outline-none bg-fundo border border-linha"
             />
           </div>
-        ) : (
+        )}
+
+        {isEmpresa && (
+          <p className="text-xs text-apoio bg-fundo border border-linha rounded-xl px-3 py-2.5">
+            Empresa paga por período (fatura), não na hora. O valor entra no relatório da aba Empresas.
+          </p>
+        )}
+
+        {!isFiado && !isEmpresa && (
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-tinta block">Forma de pagamento</label>
             <div className="grid grid-cols-3 gap-2">

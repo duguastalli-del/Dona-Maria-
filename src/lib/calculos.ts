@@ -153,11 +153,17 @@ export function calcularTotaisPeriodo(
   };
 }
 
+export interface ItemResumoEmpresa {
+  item_id: string;
+  quantidade: number;
+  total: number;
+}
+
 export interface TotalEmpresaPeriodo {
   empresa_nome: string;
   total: number;
   lancamentos: Lancamento[];
-  por_forma_pagamento: TotaisPorFormaPagamento;
+  por_item: ItemResumoEmpresa[];
 }
 
 export function calcularTotaisPorEmpresa(
@@ -179,14 +185,18 @@ export function calcularTotaisPorEmpresa(
 
   return Array.from(porEmpresa.entries())
     .map(([empresa_nome, lancamentos]) => {
-      const por_forma_pagamento = totaisFormaPagamentoVazio();
       let total = 0;
+      const porItem = new Map<string, ItemResumoEmpresa>();
       for (const l of lancamentos) {
         const valor = valorLancamento(l);
         total += valor;
-        if (l.forma_pagamento) somarPorForma(por_forma_pagamento, l.forma_pagamento, valor);
+        const atual = porItem.get(l.item_id) ?? { item_id: l.item_id, quantidade: 0, total: 0 };
+        atual.quantidade += l.quantidade;
+        atual.total += valor;
+        porItem.set(l.item_id, atual);
       }
-      return { empresa_nome, total, lancamentos, por_forma_pagamento };
+      const por_item = Array.from(porItem.values()).sort((a, b) => b.total - a.total);
+      return { empresa_nome, total, lancamentos, por_item };
     })
     .sort((a, b) => b.total - a.total);
 }

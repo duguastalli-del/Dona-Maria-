@@ -66,7 +66,6 @@ export function criarLancamentosExemplo(): Lancamento[] {
       item_id: "marmitex-g",
       quantidade: 4,
       canal: "empresa",
-      forma_pagamento: "pix",
       empresa_nome: "Transportadora Silva",
     }),
     novoLancamento({
@@ -74,7 +73,6 @@ export function criarLancamentosExemplo(): Lancamento[] {
       item_id: "marmitex-m",
       quantidade: 3,
       canal: "empresa",
-      forma_pagamento: "dinheiro",
       empresa_nome: "Padaria Bom Pão",
     }),
     // Fiado aberto hoje
@@ -107,7 +105,6 @@ export function criarLancamentosExemplo(): Lancamento[] {
       item_id: "marmitex-g",
       quantidade: 6,
       canal: "empresa",
-      forma_pagamento: "dinheiro",
       empresa_nome: "Transportadora Silva",
     }),
   ];

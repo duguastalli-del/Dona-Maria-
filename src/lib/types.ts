@@ -18,7 +18,7 @@ export interface Lancamento {
   quantidade: number;
   valor_unitario: number;
   canal: Canal;
-  forma_pagamento: FormaPagamento | null; // null quando canal = fiado
+  forma_pagamento: FormaPagamento | null; // null quando canal = fiado ou empresa (pagam depois, por período)
   fiado_cliente: string | null;
   fiado_quitado: boolean;
   fiado_quitado_em: string | null; // YYYY-MM-DD
