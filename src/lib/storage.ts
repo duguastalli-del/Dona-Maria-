@@ -1,4 +1,4 @@
-import type { DiaStatus, Empresa, FormaPagamento, Item, Lancamento } from "./types";
+import type { Categoria, DiaStatus, Empresa, FormaPagamento, Item, Lancamento } from "./types";
 import { ITENS_PADRAO } from "./itens";
 import { criarLancamentosExemplo, diaAnteontemExemplo, EMPRESAS_EXEMPLO } from "./exemplo";
 
@@ -55,6 +55,18 @@ export function atualizarItem(id: string, alteracoes: Partial<Pick<Item, "nome" 
   gravar(CHAVES.itens, itens);
 }
 
+export function adicionarItem(nome: string, categoria: Categoria, valorUnitarioPadrao: number): Item {
+  const item: Item = { id: crypto.randomUUID(), nome, categoria, valor_unitario_padrao: valorUnitarioPadrao };
+  const itens = getItens();
+  itens.push(item);
+  gravar(CHAVES.itens, itens);
+  return item;
+}
+
+export function removerItem(id: string): void {
+  gravar(CHAVES.itens, getItens().filter((i) => i.id !== id));
+}
+
 export function getLancamentos(): Lancamento[] {
   return ler(CHAVES.lancamentos, [] as Lancamento[]);
 }
@@ -86,6 +98,11 @@ export function atualizarLancamento(id: string, alteracoes: Partial<Lancamento>)
 
 export function removerLancamento(id: string): void {
   salvarLancamentos(getLancamentos().filter((l) => l.id !== id));
+}
+
+export function apagarTodosLancamentos(): void {
+  salvarLancamentos([]);
+  salvarDias([]);
 }
 
 export function quitarFiado(id: string, formaPagamento: FormaPagamento, dataQuitacao: string): void {

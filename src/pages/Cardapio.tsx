@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { AlertTriangle, Check, Plus, Trash2 } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import { NOMES_CATEGORIA } from "../lib/itens";
 import type { Categoria } from "../lib/types";
@@ -11,9 +11,19 @@ interface Rascunho {
   valor_unitario_padrao: string;
 }
 
+interface NovoItemRascunho {
+  nome: string;
+  preco: string;
+}
+
 export default function Cardapio() {
-  const { itens, editarItem } = useDados();
+  const { itens, lancamentos, editarItem, criarItem, excluirItem, apagarTodosLancamentosPor } = useDados();
   const [rascunhos, setRascunhos] = useState<Record<string, Rascunho>>({});
+  const [novosItens, setNovosItens] = useState<Record<Categoria, NovoItemRascunho>>({
+    prato: { nome: "", preco: "" },
+    bebida: { nome: "", preco: "" },
+    doce: { nome: "", preco: "" },
+  });
 
   function valorAtual(itemId: string, campo: keyof Rascunho, original: string): string {
     return rascunhos[itemId]?.[campo] ?? original;
@@ -40,10 +50,40 @@ export default function Cardapio() {
     });
   }
 
+  function excluir(itemId: string, nome: string) {
+    const emUso = lancamentos.filter((l) => l.item_id === itemId).length;
+    if (emUso > 0) {
+      alert(`Não é possível excluir "${nome}": existem ${emUso} lançamento(s) com esse item no histórico.`);
+      return;
+    }
+    if (confirm(`Excluir "${nome}" do cardápio?`)) {
+      excluirItem(itemId);
+    }
+  }
+
+  function adicionar(categoria: Categoria) {
+    const rascunho = novosItens[categoria];
+    const nome = rascunho.nome.trim();
+    const preco = Number(rascunho.preco.replace(",", "."));
+    if (!nome || Number.isNaN(preco) || preco < 0) return;
+    criarItem(nome, categoria, preco);
+    setNovosItens((atual) => ({ ...atual, [categoria]: { nome: "", preco: "" } }));
+  }
+
+  function apagarVendas() {
+    if (
+      confirm(
+        "Isso vai apagar TODOS os lançamentos de vendas (inclusive os de exemplo) e reabrir todos os dias fechados. Essa ação não pode ser desfeita. Confirmar?",
+      )
+    ) {
+      apagarTodosLancamentosPor();
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 pb-4">
       <p className="text-sm text-apoio px-1">
-        Edite o nome e o preço-padrão de cada item. A alteração vale para os próximos lançamentos.
+        Edite nome e preço, adicione ou remova itens do cardápio. As alterações valem para os próximos lançamentos.
       </p>
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
@@ -89,12 +129,71 @@ export default function Cardapio() {
                       >
                         <Check size={16} />
                       </button>
+                      <button
+                        onClick={() => excluir(item.id, item.nome)}
+                        className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-erro border border-linha"
+                        aria-label={`Excluir ${item.nome}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   );
                 })}
+
+              <div className="flex items-center gap-2 px-4 py-3 bg-fundo/50">
+                <input
+                  type="text"
+                  value={novosItens[categoria].nome}
+                  onChange={(e) =>
+                    setNovosItens((atual) => ({ ...atual, [categoria]: { ...atual[categoria], nome: e.target.value } }))
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && adicionar(categoria)}
+                  placeholder="Novo item"
+                  className="flex-1 min-w-0 rounded-lg px-2.5 py-2 text-sm outline-none bg-white border border-linha"
+                />
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-sm text-apoio">R$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    inputMode="decimal"
+                    value={novosItens[categoria].preco}
+                    onChange={(e) =>
+                      setNovosItens((atual) => ({ ...atual, [categoria]: { ...atual[categoria], preco: e.target.value } }))
+                    }
+                    onKeyDown={(e) => e.key === "Enter" && adicionar(categoria)}
+                    placeholder="0,00"
+                    className="w-20 rounded-lg px-2 py-2 text-sm outline-none bg-white border border-linha"
+                  />
+                </div>
+                <button
+                  onClick={() => adicionar(categoria)}
+                  className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-marca text-white"
+                  aria-label={`Adicionar item em ${NOMES_CATEGORIA[categoria]}`}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-erro/30 px-4 py-3 flex flex-col gap-2 md:max-w-md">
+        <h3 className="flex items-center gap-1.5 text-xs font-bold text-erro uppercase tracking-wide">
+          <AlertTriangle size={14} /> Zona de risco
+        </h3>
+        <p className="text-xs text-apoio">
+          Apaga todos os lançamentos de venda (inclusive os dados de exemplo) e reabre os dias fechados. Use antes de
+          começar a usar de verdade, ou depois de um treinamento.
+        </p>
+        <button
+          onClick={apagarVendas}
+          className="w-full rounded-xl py-2.5 text-sm font-bold text-erro border border-erro"
+        >
+          Apagar todos os lançamentos
+        </button>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import type { DiaStatus, Empresa, FormaPagamento, Item, Lancamento } from "../lib/types";
+import type { Categoria, DiaStatus, Empresa, FormaPagamento, Item, Lancamento } from "../lib/types";
 import {
   adicionarEmpresa,
+  adicionarItem,
   adicionarLancamento,
+  apagarTodosLancamentos,
   atualizarItem,
   atualizarLancamento,
   definirStatusEmpresa,
@@ -14,6 +16,7 @@ import {
   getLancamentos,
   reabrirDia,
   reabrirFiado,
+  removerItem,
   removerLancamento,
   quitarFiado,
 } from "../lib/storage";
@@ -26,11 +29,14 @@ interface DadosContextValor {
   dias: DiaStatus[];
   empresas: Empresa[];
   editarItem: (id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>) => void;
+  criarItem: (nome: string, categoria: Categoria, valorUnitarioPadrao: number) => void;
+  excluirItem: (id: string) => void;
   criarEmpresa: (nome: string) => void;
   definirStatusEmpresaPor: (id: string, ativa: boolean) => void;
   criarLancamento: (entrada: Omit<Lancamento, "id" | "criado_em">) => void;
   editarLancamento: (id: string, alteracoes: Partial<Lancamento>) => void;
   excluirLancamento: (id: string) => void;
+  apagarTodosLancamentosPor: () => void;
   quitarFiadoPor: (id: string, forma: FormaPagamento, dataQuitacao: string) => void;
   reabrirFiadoPor: (id: string) => void;
   fecharDiaPor: (data: string, dinheiroContado: number) => void;
@@ -53,6 +59,16 @@ export function DadosProvider({ children }: { children: ReactNode }) {
 
   const editarItem = useCallback((id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>) => {
     atualizarItem(id, alteracoes);
+    setItens(getItens());
+  }, []);
+
+  const criarItem = useCallback((nome: string, categoria: Categoria, valorUnitarioPadrao: number) => {
+    adicionarItem(nome, categoria, valorUnitarioPadrao);
+    setItens(getItens());
+  }, []);
+
+  const excluirItem = useCallback((id: string) => {
+    removerItem(id);
     setItens(getItens());
   }, []);
 
@@ -89,6 +105,11 @@ export function DadosProvider({ children }: { children: ReactNode }) {
     },
     [recarregar],
   );
+
+  const apagarTodosLancamentosPor = useCallback(() => {
+    apagarTodosLancamentos();
+    recarregar();
+  }, [recarregar]);
 
   const quitarFiadoPor = useCallback(
     (id: string, forma: FormaPagamento, dataQuitacao: string) => {
@@ -134,11 +155,14 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       dias,
       empresas,
       editarItem,
+      criarItem,
+      excluirItem,
       criarEmpresa,
       definirStatusEmpresaPor,
       criarLancamento,
       editarLancamento,
       excluirLancamento,
+      apagarTodosLancamentosPor,
       quitarFiadoPor,
       reabrirFiadoPor,
       fecharDiaPor,
@@ -151,11 +175,14 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       dias,
       empresas,
       editarItem,
+      criarItem,
+      excluirItem,
       criarEmpresa,
       definirStatusEmpresaPor,
       criarLancamento,
       editarLancamento,
       excluirLancamento,
+      apagarTodosLancamentosPor,
       quitarFiadoPor,
       reabrirFiadoPor,
       fecharDiaPor,
