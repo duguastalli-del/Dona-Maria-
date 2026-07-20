@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, Plus, RotateCcw, XCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, RotateCcw, ShoppingCart, XCircle } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import SeletorPeriodo from "../components/SeletorPeriodo";
 import ModalQuitarEmpresa from "../components/ModalQuitarEmpresa";
+import ModalVendaEmpresa from "../components/ModalVendaEmpresa";
 import { calcularSaldosEmpresas, calcularTotaisPorEmpresa } from "../lib/calculos";
 import { formatarDataCurta, formatarMoeda, hojeISO, primeiroDiaDoMesISO } from "../lib/format";
 import type { FormaPagamento } from "../lib/types";
@@ -16,6 +17,7 @@ export default function Empresas() {
   const [novoNome, setNovoNome] = useState("");
   const [erroCadastro, setErroCadastro] = useState("");
   const [quitando, setQuitando] = useState<string | null>(null);
+  const [lancandoEm, setLancandoEm] = useState<string | null>(null);
 
   const totais = useMemo(
     () => calcularTotaisPorEmpresa(lancamentos, dataInicio, dataFim),
@@ -87,7 +89,7 @@ export default function Empresas() {
             {empresasOrdenadas.map((e) => {
               const saldo = saldoPorEmpresa.get(e.nome) ?? 0;
               return (
-                <div key={e.id} className="flex items-center justify-between py-2.5 gap-2 flex-wrap">
+                <div key={e.id} className="flex flex-col gap-2 py-2.5">
                   <div className="min-w-0 flex items-center gap-2">
                     <span
                       className={`text-sm font-semibold truncate ${e.ativa ? "text-tinta" : "text-apoio line-through"}`}
@@ -100,13 +102,19 @@ export default function Empresas() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => setLancandoEm(e.nome)}
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white bg-marca"
+                    >
+                      <ShoppingCart size={14} /> Lançar venda
+                    </button>
                     {saldo > 0 && (
                       <>
                         <span className="text-sm font-bold text-tinta">{formatarMoeda(saldo)}</span>
                         <button
                           onClick={() => setQuitando(e.nome)}
-                          className="rounded-lg px-3 py-1.5 text-xs font-bold text-white bg-marca"
+                          className="rounded-lg px-3 py-1.5 text-xs font-bold text-marca border border-marca"
                         >
                           Quitar
                         </button>
@@ -115,14 +123,14 @@ export default function Empresas() {
                     {e.ativa ? (
                       <button
                         onClick={() => definirStatusEmpresaPor(e.id, false)}
-                        className="flex items-center gap-1 text-xs font-semibold text-erro"
+                        className="flex items-center gap-1 text-xs font-semibold text-erro ml-auto"
                       >
                         <XCircle size={14} /> Encerrar
                       </button>
                     ) : (
                       <button
                         onClick={() => definirStatusEmpresaPor(e.id, true)}
-                        className="flex items-center gap-1 text-xs font-semibold text-marca"
+                        className="flex items-center gap-1 text-xs font-semibold text-marca ml-auto"
                       >
                         <RotateCcw size={14} /> Reativar
                       </button>
@@ -243,6 +251,8 @@ export default function Empresas() {
           onConfirmar={confirmarQuitacao}
         />
       )}
+
+      {lancandoEm && <ModalVendaEmpresa empresaNome={lancandoEm} onFechar={() => setLancandoEm(null)} />}
     </div>
   );
 }

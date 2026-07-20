@@ -7,7 +7,7 @@ interface Props {
   item: Item;
   disabled: boolean;
   onLancarRapido: (item: Item, quantidade: number) => void;
-  onMaisOpcoes: (item: Item, quantidadeAtual: number) => void;
+  onMaisOpcoes?: (item: Item, quantidadeAtual: number) => void;
 }
 
 export default function LinhaItemRapido({ item, disabled, onLancarRapido, onMaisOpcoes }: Props) {
@@ -50,14 +50,16 @@ export default function LinhaItemRapido({ item, disabled, onLancarRapido, onMais
       >
         <Check size={16} />
       </button>
-      <button
-        onClick={() => onMaisOpcoes(item, qtdNum)}
-        disabled={disabled}
-        aria-label={`Mais opções ${item.nome}`}
-        className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-apoio border border-linha disabled:opacity-30"
-      >
-        <MoreHorizontal size={16} />
-      </button>
+      {onMaisOpcoes && (
+        <button
+          onClick={() => onMaisOpcoes(item, qtdNum)}
+          disabled={disabled}
+          aria-label={`Mais opções ${item.nome}`}
+          className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-apoio border border-linha disabled:opacity-30"
+        >
+          <MoreHorizontal size={16} />
+        </button>
+      )}
     </div>
   );
 }
