@@ -46,9 +46,7 @@ export default function App() {
                 <ArrowLeft size={20} />
               </button>
             ) : (
-              <div className="md:hidden w-9 h-9 rounded-xl bg-marca text-white font-black flex items-center justify-center text-sm shrink-0">
-                DM
-              </div>
+              <img src="/logo.png" alt="Dona Maria" className="md:hidden w-10 h-10 object-contain shrink-0" />
             )}
             <div className="flex-1 min-w-0">
               <p className="md:hidden text-[11px] font-semibold text-apoio leading-none">Restaurante Dona Maria</p>

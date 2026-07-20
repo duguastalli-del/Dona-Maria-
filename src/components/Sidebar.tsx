@@ -12,9 +12,7 @@ export default function Sidebar({ ativa, mostrandoCardapio, onMudarAba, onAbrirC
   return (
     <aside className="hidden md:flex md:flex-col w-60 shrink-0 bg-white border-r border-linha min-h-screen px-4 py-6 gap-6">
       <div className="flex items-center gap-3 px-1">
-        <div className="w-10 h-10 rounded-xl bg-marca text-white font-black flex items-center justify-center text-sm shrink-0">
-          DM
-        </div>
+        <img src="/logo.png" alt="Dona Maria" className="w-12 h-12 object-contain shrink-0" />
         <div>
           <p className="text-[11px] font-semibold text-apoio leading-none">Restaurante</p>
           <p className="text-sm font-bold text-tinta leading-tight">Dona Maria</p>
