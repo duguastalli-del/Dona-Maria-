@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import type { DiaStatus, FormaPagamento, Item, Lancamento } from "../lib/types";
 import {
   adicionarLancamento,
+  atualizarItem,
   atualizarLancamento,
   fecharDia,
   garantirDadosIniciais,
@@ -20,6 +21,7 @@ interface DadosContextValor {
   itens: Item[];
   lancamentos: Lancamento[];
   dias: DiaStatus[];
+  editarItem: (id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>) => void;
   criarLancamento: (entrada: Omit<Lancamento, "id" | "criado_em">) => void;
   editarLancamento: (id: string, alteracoes: Partial<Lancamento>) => void;
   excluirLancamento: (id: string) => void;
@@ -33,13 +35,18 @@ interface DadosContextValor {
 const DadosContext = createContext<DadosContextValor | null>(null);
 
 export function DadosProvider({ children }: { children: ReactNode }) {
-  const [itens] = useState<Item[]>(() => getItens());
+  const [itens, setItens] = useState<Item[]>(() => getItens());
   const [lancamentos, setLancamentos] = useState<Lancamento[]>(() => getLancamentos());
   const [dias, setDias] = useState<DiaStatus[]>(() => getDias());
 
   const recarregar = useCallback(() => {
     setLancamentos(getLancamentos());
     setDias(getDias());
+  }, []);
+
+  const editarItem = useCallback((id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>) => {
+    atualizarItem(id, alteracoes);
+    setItens(getItens());
   }, []);
 
   const criarLancamento = useCallback(
@@ -108,6 +115,7 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       itens,
       lancamentos,
       dias,
+      editarItem,
       criarLancamento,
       editarLancamento,
       excluirLancamento,
@@ -117,7 +125,20 @@ export function DadosProvider({ children }: { children: ReactNode }) {
       reabrirDiaPor,
       diaStatus,
     }),
-    [itens, lancamentos, dias, criarLancamento, editarLancamento, excluirLancamento, quitarFiadoPor, reabrirFiadoPor, fecharDiaPor, reabrirDiaPor, diaStatus],
+    [
+      itens,
+      lancamentos,
+      dias,
+      editarItem,
+      criarLancamento,
+      editarLancamento,
+      excluirLancamento,
+      quitarFiadoPor,
+      reabrirFiadoPor,
+      fecharDiaPor,
+      reabrirDiaPor,
+      diaStatus,
+    ],
   );
 
   return <DadosContext.Provider value={valor}>{children}</DadosContext.Provider>;

@@ -44,6 +44,11 @@ export function getItens(): Item[] {
   return ler(CHAVES.itens, ITENS_PADRAO);
 }
 
+export function atualizarItem(id: string, alteracoes: Partial<Pick<Item, "nome" | "valor_unitario_padrao">>): void {
+  const itens = getItens().map((i) => (i.id === id ? { ...i, ...alteracoes } : i));
+  gravar(CHAVES.itens, itens);
+}
+
 export function getLancamentos(): Lancamento[] {
   return ler(CHAVES.lancamentos, [] as Lancamento[]);
 }
