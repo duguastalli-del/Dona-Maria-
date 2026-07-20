@@ -23,7 +23,7 @@ export default function LinhaItemRapido({ item, disabled, onLancarRapido, onMais
   return (
     <div className="flex items-center gap-2 px-4 py-3">
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-tinta truncate">{item.nome}</p>
+        <p className="text-sm font-semibold text-tinta leading-snug">{item.nome}</p>
         <p className="text-xs text-apoio">
           {formatarMoeda(item.valor_unitario_padrao)}
           {qtdNum > 0 && <span className="font-semibold text-marca"> · = {formatarMoeda(qtdNum * item.valor_unitario_padrao)}</span>}

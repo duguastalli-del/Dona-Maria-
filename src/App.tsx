@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Settings } from "lucide-react";
 import { DadosProvider } from "./contexts/DadosContext";
 import BottomNav, { type Aba } from "./components/BottomNav";
+import Sidebar from "./components/Sidebar";
 import Lancamentos from "./pages/Lancamentos";
 import Fechamento from "./pages/Fechamento";
 import Empresas from "./pages/Empresas";
@@ -23,53 +24,65 @@ export default function App() {
   const [data, setData] = useState(hojeISO());
   const [mostrarCardapio, setMostrarCardapio] = useState(false);
 
+  function mudarAba(novaAba: Aba) {
+    setMostrarCardapio(false);
+    setAba(novaAba);
+  }
+
   return (
     <DadosProvider>
-      <div className="min-h-screen bg-fundo flex flex-col">
-        <header className="bg-white border-b border-linha px-4 py-3 flex items-center gap-3">
-          {mostrarCardapio ? (
-            <button onClick={() => setMostrarCardapio(false)} className="p-1 text-tinta" aria-label="Voltar">
-              <ArrowLeft size={20} />
-            </button>
-          ) : (
-            <div className="w-9 h-9 rounded-xl bg-marca text-white font-black flex items-center justify-center text-sm shrink-0">
-              DM
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-semibold text-apoio leading-none">Restaurante Dona Maria</p>
-            <h1 className="text-base font-bold text-tinta leading-tight truncate">
-              {mostrarCardapio ? "Cardápio" : TITULOS[aba]}
-            </h1>
-          </div>
-          {!mostrarCardapio && (
-            <button onClick={() => setMostrarCardapio(true)} className="p-1.5 text-apoio" aria-label="Editar cardápio">
-              <Settings size={20} />
-            </button>
-          )}
-        </header>
-
-        <main className="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-24">
-          {mostrarCardapio ? (
-            <Cardapio />
-          ) : (
-            <>
-              {aba === "lancamentos" && <Lancamentos data={data} onMudarData={setData} />}
-              {aba === "fechamento" && <Fechamento data={data} onMudarData={setData} />}
-              {aba === "empresas" && <Empresas />}
-              {aba === "fiados" && <Fiados />}
-              {aba === "historico" && <Historico />}
-            </>
-          )}
-        </main>
-
-        <BottomNav
+      <div className="min-h-screen bg-fundo flex">
+        <Sidebar
           ativa={aba}
-          onMudar={(novaAba) => {
-            setMostrarCardapio(false);
-            setAba(novaAba);
-          }}
+          mostrandoCardapio={mostrarCardapio}
+          onMudarAba={mudarAba}
+          onAbrirCardapio={() => setMostrarCardapio(true)}
         />
+
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="bg-white border-b border-linha px-4 md:px-8 py-3 md:py-4 flex items-center gap-3">
+            {mostrarCardapio ? (
+              <button onClick={() => setMostrarCardapio(false)} className="md:hidden p-1 text-tinta" aria-label="Voltar">
+                <ArrowLeft size={20} />
+              </button>
+            ) : (
+              <div className="md:hidden w-9 h-9 rounded-xl bg-marca text-white font-black flex items-center justify-center text-sm shrink-0">
+                DM
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="md:hidden text-[11px] font-semibold text-apoio leading-none">Restaurante Dona Maria</p>
+              <h1 className="text-base md:text-xl font-bold text-tinta leading-tight truncate">
+                {mostrarCardapio ? "Cardápio" : TITULOS[aba]}
+              </h1>
+            </div>
+            {!mostrarCardapio && (
+              <button
+                onClick={() => setMostrarCardapio(true)}
+                className="md:hidden p-1.5 text-apoio"
+                aria-label="Editar cardápio"
+              >
+                <Settings size={20} />
+              </button>
+            )}
+          </header>
+
+          <main className="flex-1 w-full mx-auto px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-10 max-w-md md:max-w-6xl">
+            {mostrarCardapio ? (
+              <Cardapio />
+            ) : (
+              <>
+                {aba === "lancamentos" && <Lancamentos data={data} onMudarData={setData} />}
+                {aba === "fechamento" && <Fechamento data={data} onMudarData={setData} />}
+                {aba === "empresas" && <Empresas />}
+                {aba === "fiados" && <Fiados />}
+                {aba === "historico" && <Historico />}
+              </>
+            )}
+          </main>
+
+          <BottomNav ativa={aba} onMudar={mudarAba} />
+        </div>
       </div>
     </DadosProvider>
   );

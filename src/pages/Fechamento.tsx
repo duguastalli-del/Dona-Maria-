@@ -71,41 +71,43 @@ export default function Fechamento({ data, onMudarData }: { data: string; onMuda
         </div>
       </div>
 
-      <Cartao titulo="Total por canal">
-        {CANAIS.map((c) => (
-          <LinhaValor key={c} rotulo={ROTULO_CANAL[c]} valor={fechamento.total_por_canal[c]} />
-        ))}
-      </Cartao>
+      <div className="flex flex-col gap-4 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-4 md:items-start">
+        <Cartao titulo="Total por canal">
+          {CANAIS.map((c) => (
+            <LinhaValor key={c} rotulo={ROTULO_CANAL[c]} valor={fechamento.total_por_canal[c]} />
+          ))}
+        </Cartao>
 
-      <Cartao titulo="Vendas do dia — por forma de pagamento">
-        {FORMAS_PAGAMENTO.map((f) => (
-          <LinhaValor key={f} rotulo={ROTULO_FORMA_PAGAMENTO[f]} valor={fechamento.vendas_dia_por_forma_pagamento[f]} />
-        ))}
-      </Cartao>
+        <Cartao titulo="Vendas do dia — por forma de pagamento">
+          {FORMAS_PAGAMENTO.map((f) => (
+            <LinhaValor key={f} rotulo={ROTULO_FORMA_PAGAMENTO[f]} valor={fechamento.vendas_dia_por_forma_pagamento[f]} />
+          ))}
+        </Cartao>
 
-      <Cartao titulo="Fiados quitados hoje — por forma de pagamento">
-        {FORMAS_PAGAMENTO.map((f) => (
-          <LinhaValor
-            key={f}
-            rotulo={ROTULO_FORMA_PAGAMENTO[f]}
-            valor={fechamento.fiados_quitados_hoje_por_forma_pagamento[f]}
-          />
-        ))}
-        <LinhaValor rotulo="Total quitado hoje" valor={fechamento.fiado_quitado_hoje} destaque />
-      </Cartao>
+        <Cartao titulo="Fiados quitados hoje — por forma de pagamento">
+          {FORMAS_PAGAMENTO.map((f) => (
+            <LinhaValor
+              key={f}
+              rotulo={ROTULO_FORMA_PAGAMENTO[f]}
+              valor={fechamento.fiados_quitados_hoje_por_forma_pagamento[f]}
+            />
+          ))}
+          <LinhaValor rotulo="Total quitado hoje" valor={fechamento.fiado_quitado_hoje} destaque />
+        </Cartao>
 
-      <Cartao titulo="Total por forma de pagamento (geral)">
-        {FORMAS_PAGAMENTO.map((f) => (
-          <LinhaValor key={f} rotulo={ROTULO_FORMA_PAGAMENTO[f]} valor={fechamento.total_por_forma_pagamento[f]} destaque />
-        ))}
-      </Cartao>
+        <Cartao titulo="Total por forma de pagamento (geral)">
+          {FORMAS_PAGAMENTO.map((f) => (
+            <LinhaValor key={f} rotulo={ROTULO_FORMA_PAGAMENTO[f]} valor={fechamento.total_por_forma_pagamento[f]} destaque />
+          ))}
+        </Cartao>
 
-      <Cartao titulo="Fiado">
-        <LinhaValor rotulo="Aberto (gerado hoje, ainda não pago)" valor={fechamento.fiado_aberto} />
-        <LinhaValor rotulo="Quitado hoje" valor={fechamento.fiado_quitado_hoje} />
-      </Cartao>
+        <Cartao titulo="Fiado">
+          <LinhaValor rotulo="Aberto (gerado hoje, ainda não pago)" valor={fechamento.fiado_aberto} />
+          <LinhaValor rotulo="Quitado hoje" valor={fechamento.fiado_quitado_hoje} />
+        </Cartao>
+      </div>
 
-      <div className="bg-white rounded-2xl border border-linha px-4 py-3 flex flex-col gap-3">
+      <div className="bg-white rounded-2xl border border-linha px-4 py-3 flex flex-col gap-3 md:max-w-md">
         <h3 className="text-xs font-bold text-apoio uppercase tracking-wide">Conferência de caixa (dinheiro)</h3>
         <LinhaValor rotulo="Dinheiro esperado" valor={fechamento.dinheiro_esperado} destaque />
 

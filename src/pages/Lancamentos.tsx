@@ -106,76 +106,82 @@ export default function Lancamentos({ data, onMudarData }: { data: string; onMud
         </div>
       )}
 
-      <div className="flex flex-col gap-4">
-        {CATEGORIAS.map((categoria) => (
-          <div key={categoria} className="flex flex-col gap-2">
-            <h3 className="text-xs font-bold text-apoio uppercase tracking-wide px-1">{NOMES_CATEGORIA[categoria]}</h3>
-            <div className="bg-white rounded-2xl border border-linha divide-y divide-linha">
-              {itens
-                .filter((i) => i.categoria === categoria)
-                .map((item) => (
-                  <LinhaItemRapido
-                    key={`${item.id}:${versaoLinha[item.id] ?? 0}`}
-                    item={item}
-                    disabled={status.fechado}
-                    onLancarRapido={lancarRapido}
-                    onMaisOpcoes={abrirMaisOpcoes}
-                  />
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <p className="text-xs text-apoio px-1 -mt-2">
-        Digite a quantidade e toque em ✓ pra lançar rápido (Salão/Dinheiro). Use "⋯" pra iFood, 99Food, Empresa ou
-        Fiado.
-      </p>
-
-      <div className="flex flex-col gap-2">
-        <h3 className="text-xs font-bold text-apoio uppercase tracking-wide px-1">
-          Lançamentos do dia ({lancamentosDoDia.length})
-        </h3>
-        {lancamentosDoDia.length === 0 ? (
-          <p className="text-sm text-apoio px-1">Nenhum lançamento ainda.</p>
-        ) : (
-          <div className="bg-white rounded-2xl border border-linha divide-y divide-linha">
-            {lancamentosDoDia.map((l) => {
-              const item = itens.find((i) => i.id === l.item_id);
-              return (
-                <div key={l.id} className="flex items-center justify-between px-4 py-3 gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-tinta truncate">
-                      {l.quantidade}x {item?.nome ?? "Item"}
-                    </p>
-                    <p className="text-xs text-apoio truncate">
-                      {ROTULO_CANAL[l.canal]} · {rotuloCanalLinha(l)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-sm font-bold text-tinta">{formatarMoeda(valorLancamento(l))}</span>
-                    <button
-                      onClick={() => abrirEdicao(l)}
-                      disabled={status.fechado}
-                      className="p-1.5 text-apoio disabled:opacity-30"
-                      aria-label="Editar"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => excluir(l)}
-                      disabled={status.fechado}
-                      className="p-1.5 text-erro disabled:opacity-30"
-                      aria-label="Remover"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-5 lg:gap-6 lg:items-start">
+        <div className="flex flex-col gap-4 lg:col-span-3">
+          <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-4 md:items-start">
+            {CATEGORIAS.map((categoria) => (
+              <div key={categoria} className="flex flex-col gap-2">
+                <h3 className="text-xs font-bold text-apoio uppercase tracking-wide px-1">
+                  {NOMES_CATEGORIA[categoria]}
+                </h3>
+                <div className="bg-white rounded-2xl border border-linha divide-y divide-linha">
+                  {itens
+                    .filter((i) => i.categoria === categoria)
+                    .map((item) => (
+                      <LinhaItemRapido
+                        key={`${item.id}:${versaoLinha[item.id] ?? 0}`}
+                        item={item}
+                        disabled={status.fechado}
+                        onLancarRapido={lancarRapido}
+                        onMaisOpcoes={abrirMaisOpcoes}
+                      />
+                    ))}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-        )}
+
+          <p className="text-xs text-apoio px-1">
+            Digite a quantidade e toque em ✓ pra lançar rápido (Salão/Dinheiro). Use "⋯" pra iFood, 99Food, Empresa ou
+            Fiado.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 lg:col-span-2 lg:sticky lg:top-6">
+          <h3 className="text-xs font-bold text-apoio uppercase tracking-wide px-1">
+            Lançamentos do dia ({lancamentosDoDia.length})
+          </h3>
+          {lancamentosDoDia.length === 0 ? (
+            <p className="text-sm text-apoio px-1">Nenhum lançamento ainda.</p>
+          ) : (
+            <div className="bg-white rounded-2xl border border-linha divide-y divide-linha max-h-[70vh] overflow-y-auto">
+              {lancamentosDoDia.map((l) => {
+                const item = itens.find((i) => i.id === l.item_id);
+                return (
+                  <div key={l.id} className="flex items-center justify-between px-4 py-3 gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-tinta truncate">
+                        {l.quantidade}x {item?.nome ?? "Item"}
+                      </p>
+                      <p className="text-xs text-apoio truncate">
+                        {ROTULO_CANAL[l.canal]} · {rotuloCanalLinha(l)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-bold text-tinta">{formatarMoeda(valorLancamento(l))}</span>
+                      <button
+                        onClick={() => abrirEdicao(l)}
+                        disabled={status.fechado}
+                        className="p-1.5 text-apoio disabled:opacity-30"
+                        aria-label="Editar"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={() => excluir(l)}
+                        disabled={status.fechado}
+                        className="p-1.5 text-erro disabled:opacity-30"
+                        aria-label="Remover"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {itemAtivo && (

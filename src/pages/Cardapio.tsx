@@ -46,54 +46,56 @@ export default function Cardapio() {
         Edite o nome e o preço-padrão de cada item. A alteração vale para os próximos lançamentos.
       </p>
 
-      {CATEGORIAS.map((categoria) => (
-        <div key={categoria} className="flex flex-col gap-2">
-          <h3 className="text-xs font-bold text-apoio uppercase tracking-wide px-1">{NOMES_CATEGORIA[categoria]}</h3>
-          <div className="bg-white rounded-2xl border border-linha divide-y divide-linha">
-            {itens
-              .filter((i) => i.categoria === categoria)
-              .map((item) => {
-                const nome = valorAtual(item.id, "nome", item.nome);
-                const preco = valorAtual(item.id, "valor_unitario_padrao", String(item.valor_unitario_padrao));
-                const alterado = !!rascunhos[item.id];
-                return (
-                  <div key={item.id} className="flex items-center gap-2 px-4 py-3">
-                    <input
-                      type="text"
-                      value={nome}
-                      onChange={(e) =>
-                        alterar(item.id, "nome", e.target.value, { nome: item.nome, valor_unitario_padrao: preco })
-                      }
-                      className="flex-1 min-w-0 rounded-lg px-2.5 py-2 text-sm outline-none bg-fundo border border-linha"
-                    />
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="text-sm text-apoio">R$</span>
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
+        {CATEGORIAS.map((categoria) => (
+          <div key={categoria} className="flex flex-col gap-2">
+            <h3 className="text-xs font-bold text-apoio uppercase tracking-wide px-1">{NOMES_CATEGORIA[categoria]}</h3>
+            <div className="bg-white rounded-2xl border border-linha divide-y divide-linha">
+              {itens
+                .filter((i) => i.categoria === categoria)
+                .map((item) => {
+                  const nome = valorAtual(item.id, "nome", item.nome);
+                  const preco = valorAtual(item.id, "valor_unitario_padrao", String(item.valor_unitario_padrao));
+                  const alterado = !!rascunhos[item.id];
+                  return (
+                    <div key={item.id} className="flex items-center gap-2 px-4 py-3">
                       <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        inputMode="decimal"
-                        value={preco}
+                        type="text"
+                        value={nome}
                         onChange={(e) =>
-                          alterar(item.id, "valor_unitario_padrao", e.target.value, { nome, valor_unitario_padrao: preco })
+                          alterar(item.id, "nome", e.target.value, { nome: item.nome, valor_unitario_padrao: preco })
                         }
-                        className="w-20 rounded-lg px-2 py-2 text-sm outline-none bg-fundo border border-linha"
+                        className="flex-1 min-w-0 rounded-lg px-2.5 py-2 text-sm outline-none bg-fundo border border-linha"
                       />
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-sm text-apoio">R$</span>
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          inputMode="decimal"
+                          value={preco}
+                          onChange={(e) =>
+                            alterar(item.id, "valor_unitario_padrao", e.target.value, { nome, valor_unitario_padrao: preco })
+                          }
+                          className="w-20 rounded-lg px-2 py-2 text-sm outline-none bg-fundo border border-linha"
+                        />
+                      </div>
+                      <button
+                        onClick={() => salvar(item.id)}
+                        disabled={!alterado}
+                        className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-marca text-white disabled:opacity-20"
+                        aria-label={`Salvar ${item.nome}`}
+                      >
+                        <Check size={16} />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => salvar(item.id)}
-                      disabled={!alterado}
-                      className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-marca text-white disabled:opacity-20"
-                      aria-label={`Salvar ${item.nome}`}
-                    >
-                      <Check size={16} />
-                    </button>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

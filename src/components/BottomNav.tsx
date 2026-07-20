@@ -2,7 +2,7 @@ import { Building2, ClipboardList, HandCoins, History, Receipt } from "lucide-re
 
 export type Aba = "lancamentos" | "fechamento" | "empresas" | "fiados" | "historico";
 
-const ITENS: { id: Aba; rotulo: string; Icone: typeof ClipboardList }[] = [
+export const ITENS_NAV: { id: Aba; rotulo: string; Icone: typeof ClipboardList }[] = [
   { id: "lancamentos", rotulo: "Lançamentos", Icone: ClipboardList },
   { id: "fechamento", rotulo: "Fechamento", Icone: Receipt },
   { id: "empresas", rotulo: "Empresas", Icone: Building2 },
@@ -12,9 +12,9 @@ const ITENS: { id: Aba; rotulo: string; Icone: typeof ClipboardList }[] = [
 
 export default function BottomNav({ ativa, onMudar }: { ativa: Aba; onMudar: (aba: Aba) => void }) {
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-linha pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-linha pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-md mx-auto grid grid-cols-5">
-        {ITENS.map(({ id, rotulo, Icone }) => {
+        {ITENS_NAV.map(({ id, rotulo, Icone }) => {
           const ativo = ativa === id;
           return (
             <button
