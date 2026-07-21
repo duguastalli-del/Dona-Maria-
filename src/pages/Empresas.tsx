@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, Plus, RotateCcw, ShoppingCart, XCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Plus, RotateCcw, ShoppingCart, XCircle } from "lucide-react";
 import { useDados } from "../contexts/DadosContext";
 import SeletorPeriodo from "../components/SeletorPeriodo";
 import ModalQuitarEmpresa from "../components/ModalQuitarEmpresa";
 import ModalVendaEmpresa from "../components/ModalVendaEmpresa";
-import { calcularSaldosEmpresas, calcularTotaisPorEmpresa } from "../lib/calculos";
+import ModalRelatorioEmpresa from "../components/ModalRelatorioEmpresa";
+import { calcularSaldosEmpresas, calcularTotaisPorEmpresa, type TotalEmpresaPeriodo } from "../lib/calculos";
 import { formatarDataCurta, formatarMoeda, hojeISO, primeiroDiaDoMesISO } from "../lib/format";
 import type { FormaPagamento } from "../lib/types";
 
@@ -18,6 +19,7 @@ export default function Empresas() {
   const [erroCadastro, setErroCadastro] = useState("");
   const [quitando, setQuitando] = useState<string | null>(null);
   const [lancandoEm, setLancandoEm] = useState<string | null>(null);
+  const [relatorioDe, setRelatorioDe] = useState<TotalEmpresaPeriodo | null>(null);
 
   const totais = useMemo(
     () => calcularTotaisPorEmpresa(lancamentos, dataInicio, dataFim),
@@ -169,19 +171,35 @@ export default function Empresas() {
             const aberta = expandida === e.empresa_nome;
             return (
               <div key={e.empresa_nome} className="bg-white rounded-2xl border border-linha overflow-hidden">
-                <button
-                  onClick={() => setExpandida(aberta ? null : e.empresa_nome)}
-                  className="w-full flex items-center justify-between px-4 py-3"
-                >
-                  <div className="text-left min-w-0">
-                    <p className="text-sm font-bold text-tinta truncate">{e.empresa_nome}</p>
-                    <p className="text-xs text-apoio">{e.lancamentos.length} lançamento(s)</p>
-                  </div>
+                <div className="w-full flex items-center justify-between px-4 py-3 gap-2">
+                  <button
+                    onClick={() => setExpandida(aberta ? null : e.empresa_nome)}
+                    className="flex-1 flex items-center justify-between text-left min-w-0"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-tinta truncate">{e.empresa_nome}</p>
+                      <p className="text-xs text-apoio">{e.lancamentos.length} lançamento(s)</p>
+                    </div>
+                  </button>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-sm font-bold text-tinta">{formatarMoeda(e.total)}</span>
-                    {aberta ? <ChevronUp size={18} className="text-apoio" /> : <ChevronDown size={18} className="text-apoio" />}
+                    <button
+                      onClick={() => setRelatorioDe(e)}
+                      className="p-1.5 text-apoio border border-linha rounded-lg"
+                      aria-label={`Relatório de ${e.empresa_nome}`}
+                      title="Gerar relatório / PDF"
+                    >
+                      <FileText size={16} />
+                    </button>
+                    <button
+                      onClick={() => setExpandida(aberta ? null : e.empresa_nome)}
+                      className="p-1"
+                      aria-label={aberta ? "Recolher" : "Expandir"}
+                    >
+                      {aberta ? <ChevronUp size={18} className="text-apoio" /> : <ChevronDown size={18} className="text-apoio" />}
+                    </button>
                   </div>
-                </button>
+                </div>
 
                 {aberta && (
                   <div className="px-4 pb-4 border-t border-linha pt-3 flex flex-col gap-3">
@@ -253,6 +271,15 @@ export default function Empresas() {
       )}
 
       {lancandoEm && <ModalVendaEmpresa empresaNome={lancandoEm} onFechar={() => setLancandoEm(null)} />}
+
+      {relatorioDe && (
+        <ModalRelatorioEmpresa
+          dados={relatorioDe}
+          dataInicio={dataInicio}
+          dataFim={dataFim}
+          onFechar={() => setRelatorioDe(null)}
+        />
+      )}
     </div>
   );
 }

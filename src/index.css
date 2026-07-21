@@ -11,3 +11,22 @@ body {
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .relatorio-print,
+  .relatorio-print * {
+    visibility: visible;
+  }
+  .relatorio-print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
